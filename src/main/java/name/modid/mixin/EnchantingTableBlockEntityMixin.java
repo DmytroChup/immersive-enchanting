@@ -3,6 +3,8 @@ package name.modid.mixin;
 import name.modid.fsm.IImmersiveTableData;
 import name.modid.fsm.TableState;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -62,6 +64,22 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
         if (this.level != null && !this.level.isClientSide()) {
             this.level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
         }
+    }
+
+    @Override
+    public @NonNull CompoundTag getUpdateTag(HolderLookup.@NonNull Provider registries) {
+        CompoundTag tag = super.getUpdateTag(registries);
+
+        tag.putString(STATE_KEY, this.immersiveState.name());
+
+        if (!this.targetItem.isEmpty()) {
+            net.minecraft.world.item.ItemStack.OPTIONAL_CODEC.encodeStart(
+                    registries.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE),
+                    this.targetItem
+            ).result().ifPresent(itemTag -> tag.put(ITEM_KEY, itemTag));
+        }
+
+        return tag;
     }
 
     @Inject(method = "saveAdditional", at = @At("TAIL"))
