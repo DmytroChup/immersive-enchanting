@@ -3,7 +3,8 @@
 	"package": "name.modid.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
-		"EnchantingTableBlockMixin"
+		"EnchantingTableBlockMixin",
+		"EnchantingTableBlockEntityMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
