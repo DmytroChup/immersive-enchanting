@@ -90,6 +90,6 @@ public class MinecraftClientMixin {
             return -1;
         }
 
-        return RuneRaycaster.raycastActiveRunes(player, pos, 3, partialTicks);
+        return RuneRaycaster.raycastActiveRunes(player, pos, 4, partialTicks);
     }
 }

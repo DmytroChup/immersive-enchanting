@@ -13,6 +13,14 @@ public class EnchantTableRenderStateMixin implements IImmersiveRenderState {
     private final ItemStackRenderState immersiveItemState = new ItemStackRenderState();
 
     @Unique
+    private final ItemStackRenderState[] runeItemStates = new ItemStackRenderState[] {
+            new ItemStackRenderState(),
+            new ItemStackRenderState(),
+            new ItemStackRenderState(),
+            new ItemStackRenderState()
+    };
+
+    @Unique
     private boolean immersiveActive = false;
 
     @Unique
@@ -49,7 +57,12 @@ public class EnchantTableRenderStateMixin implements IImmersiveRenderState {
     public void setImmersiveBobbing(float bobbing) { this.immersiveBobbing = bobbing; }
 
     @Override
-    public ItemStackRenderState getRuneItemState() { return this.runeItemState; }
+    public ItemStackRenderState getRuneItemState(int index) {
+        if (index >= 0 && index < runeItemStates.length) {
+            return this.runeItemStates[index];
+        }
+        return this.runeItemStates[0];
+    }
 
     @Override
     public float getRenderTime() { return this.renderTime; }

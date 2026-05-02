@@ -2,6 +2,7 @@ package tnpl.immersiveenchanting.client.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.minecraft.world.item.Item;
 import tnpl.immersiveenchanting.client.fsm.IImmersiveRenderState;
 import tnpl.immersiveenchanting.fsm.IImmersiveTableData;
 import tnpl.immersiveenchanting.fsm.TableState;
@@ -31,6 +32,14 @@ public class EnchantTableRendererMixin {
     @Unique
     private ItemModelResolver itemModelResolver;
 
+    @Unique
+    private static final Item[] RUNE_TYPES = {
+            Items.AMETHYST_SHARD,
+            Items.LAPIS_LAZULI,
+            Items.GOLD_INGOT,
+            Items.DIAMOND
+    };
+
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onInit(BlockEntityRendererProvider.Context context, CallbackInfo ci) {
         this.itemModelResolver = context.itemModelResolver();
@@ -56,7 +65,7 @@ public class EnchantTableRendererMixin {
             if (!targetItem.isEmpty() && this.itemModelResolver != null) {
                 int seed = (int) blockEntity.getBlockPos().asLong();
 
-                // 1. Resolve Main Target Item (Sword)
+                // 1. Resolve Main Target Item
                 this.itemModelResolver.updateForTopItem(
                         customState.getImmersiveItemState(),
                         targetItem,
@@ -66,17 +75,18 @@ public class EnchantTableRendererMixin {
                         seed
                 );
 
-                // 2. Resolve Rune Item (Placeholder: Amethyst Shard)
-                // TODO: Replace Items.AMETHYST_SHARD with custom rune item
-                ItemStack runeStack = new ItemStack(Items.AMETHYST_SHARD);
-                this.itemModelResolver.updateForTopItem(
-                        customState.getRuneItemState(),
-                        runeStack,
-                        ItemDisplayContext.GROUND,
-                        blockEntity.getLevel(),
-                        null,
-                        seed + 1
-                );
+                // 2. Resolve 4 Different Rune Items (Placeholders)
+                for (int i = 0; i < RUNE_TYPES.length; i++) {
+                    ItemStack runeStack = new ItemStack(RUNE_TYPES[i]);
+                    this.itemModelResolver.updateForTopItem(
+                            customState.getRuneItemState(i),
+                            runeStack,
+                            ItemDisplayContext.GROUND,
+                            blockEntity.getLevel(),
+                            null,
+                            seed + i + 1
+                    );
+                }
 
                 // 3. Calculate and store shared animation variables
                 if (blockEntity.getLevel() != null) {
@@ -84,6 +94,7 @@ public class EnchantTableRendererMixin {
                     customState.setRenderTime(renderTime);
 
                     customState.setImmersiveAngle((renderTime * 3.0F) % 360.0F);
+
                     float bobbing = (float) Math.sin(renderTime * 0.1F) * 0.1F;
                     customState.setImmersiveBobbing(bobbing);
                 }
@@ -119,13 +130,13 @@ public class EnchantTableRendererMixin {
                 poseStack.popPose();
             }
 
-            // --- Render Floating Runes ---
-            if (!customState.getRuneItemState().isEmpty()) {
-                float time = customState.getRenderTime();
-                int totalRunes = 3;
-                double radius = 1.0; // Must match RuneRaycaster radius
+            // --- Render 4 Floating Runes ---
+            float time = customState.getRenderTime();
+            int totalRunes = 4;
+            double radius = 1.0; // Must match RuneRaycaster radius
 
-                for (int i = 0; i < totalRunes; i++) {
+            for (int i = 0; i < totalRunes; i++) {
+                if (!customState.getRuneItemState(i).isEmpty()) {
                     poseStack.pushPose();
 
                     // Same polar math as RuneRaycaster, but mapped to local 0.0 - 1.0 block space
@@ -144,7 +155,7 @@ public class EnchantTableRendererMixin {
                     // Scale down the runes so they are visually smaller than the main item
                     poseStack.scale(0.6F, 0.6F, 0.6F);
 
-                    customState.getRuneItemState().submit(
+                    customState.getRuneItemState(i).submit(
                             poseStack, submitNodeCollector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0
                     );
 
