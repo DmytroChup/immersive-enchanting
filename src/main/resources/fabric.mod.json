@@ -5,7 +5,7 @@
 	"name": "Immersive Enchanting",
 	"description": "This is an example description! Tell everyone what your mod is about!",
 	"authors": [
-		"Me!"
+		"tnpl"
 	],
 	"contact": {
 		"homepage": "https://fabricmc.net/",
@@ -16,10 +16,10 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"name.modid.ImmersiveEnchanting"
+			"tnpl.immersiveenchanting.ImmersiveEnchanting"
 		],
 		"client": [
-			"name.modid.client.ImmersiveEnchantingClient"
+			"tnpl.immersiveenchanting.client.ImmersiveEnchantingClient"
 		]
 	},
 	"mixins": [

@@ -1,6 +1,6 @@
-package name.modid.client.mixin;
+package tnpl.immersiveenchanting.client.mixin;
 
-import name.modid.client.fsm.IImmersiveRenderState;
+import tnpl.immersiveenchanting.client.fsm.IImmersiveRenderState;
 import net.minecraft.client.renderer.blockentity.state.EnchantTableRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import org.spongepowered.asm.mixin.Mixin;

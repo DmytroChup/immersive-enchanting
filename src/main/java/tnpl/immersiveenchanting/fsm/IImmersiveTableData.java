@@ -1,4 +1,4 @@
-package name.modid.fsm;
+package tnpl.immersiveenchanting.fsm;
 
 import net.minecraft.world.item.ItemStack;
 

@@ -1,10 +1,10 @@
-package name.modid.client.mixin;
+package tnpl.immersiveenchanting.client.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import name.modid.client.fsm.IImmersiveRenderState;
-import name.modid.fsm.IImmersiveTableData;
-import name.modid.fsm.TableState;
+import tnpl.immersiveenchanting.client.fsm.IImmersiveRenderState;
+import tnpl.immersiveenchanting.fsm.IImmersiveTableData;
+import tnpl.immersiveenchanting.fsm.TableState;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.EnchantTableRenderer;

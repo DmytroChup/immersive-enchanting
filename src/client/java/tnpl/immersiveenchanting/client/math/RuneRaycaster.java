@@ -1,4 +1,4 @@
-package name.modid.client.math;
+package tnpl.immersiveenchanting.client.math;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;

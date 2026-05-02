@@ -1,4 +1,4 @@
-package name.modid;
+package tnpl.immersiveenchanting;
 
 import net.fabricmc.api.ModInitializer;
 

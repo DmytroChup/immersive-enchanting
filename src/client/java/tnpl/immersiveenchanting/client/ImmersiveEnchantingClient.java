@@ -1,4 +1,4 @@
-package name.modid.client;
+package tnpl.immersiveenchanting.client;
 
 import net.fabricmc.api.ClientModInitializer;
 

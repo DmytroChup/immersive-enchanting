@@ -1,4 +1,4 @@
-package name.modid.client.fsm;
+package tnpl.immersiveenchanting.client.fsm;
 
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 

@@ -1,7 +1,7 @@
-package name.modid.mixin;
+package tnpl.immersiveenchanting.mixin;
 
-import name.modid.fsm.IImmersiveTableData;
-import name.modid.fsm.TableState;
+import tnpl.immersiveenchanting.fsm.IImmersiveTableData;
+import tnpl.immersiveenchanting.fsm.TableState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;

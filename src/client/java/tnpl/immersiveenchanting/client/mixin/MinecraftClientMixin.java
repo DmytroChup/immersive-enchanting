@@ -1,9 +1,9 @@
-package name.modid.client.mixin;
+package tnpl.immersiveenchanting.client.mixin;
 
-import name.modid.ImmersiveEnchanting;
-import name.modid.client.math.RuneRaycaster;
-import name.modid.fsm.IImmersiveTableData;
-import name.modid.fsm.TableState;
+import tnpl.immersiveenchanting.ImmersiveEnchanting;
+import tnpl.immersiveenchanting.client.math.RuneRaycaster;
+import tnpl.immersiveenchanting.fsm.IImmersiveTableData;
+import tnpl.immersiveenchanting.fsm.TableState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;

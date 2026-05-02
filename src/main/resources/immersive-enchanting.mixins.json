@@ -1,6 +1,6 @@
 {
 	"required": true,
-	"package": "name.modid.mixin",
+	"package": "tnpl.immersiveenchanting.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
 		"EnchantingTableBlockMixin",

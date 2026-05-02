@@ -1,4 +1,4 @@
-package name.modid.fsm;
+package tnpl.immersiveenchanting.fsm;
 
 public enum TableState {
     IDLE,             // The table is empty, waiting for an item
