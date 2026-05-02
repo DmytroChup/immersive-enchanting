@@ -4,7 +4,8 @@
 	"compatibilityLevel": "JAVA_25",
 	"client": [
 		"EnchantTableRendererMixin",
-		"EnchantTableRenderStateMixin"
+		"EnchantTableRenderStateMixin",
+		"MinecraftClientMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

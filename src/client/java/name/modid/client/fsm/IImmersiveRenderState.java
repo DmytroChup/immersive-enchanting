@@ -12,4 +12,9 @@ public interface IImmersiveRenderState {
 
     float getImmersiveBobbing();
     void setImmersiveBobbing(float bobbing);
+
+    // --- Rune Rendering Properties ---
+    ItemStackRenderState getRuneItemState();
+    float getRenderTime();
+    void setRenderTime(float time);
 }
