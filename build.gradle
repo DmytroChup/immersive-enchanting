@@ -24,6 +24,14 @@ loom {
 		}
 	}
 
+	runs {
+		client2 {
+			client()
+			name = "Minecraft Client (Player 2)"
+			programArgs "--username", "Player2"
+		}
+	}
+
 }
 
 dependencies {
