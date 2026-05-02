@@ -23,6 +23,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Mixin(EnchantingTableBlockEntity.class)
 public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implements IImmersiveTableData {
 
@@ -30,15 +33,36 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
     private static final String STATE_KEY = "ImmersiveState";
     @Unique
     private static final String ITEM_KEY = "ImmersiveTargetItem";
+    @Unique
+    private static final String SEQUENCE_KEY = "ImmersiveRuneSequence";
 
     @Unique
     private TableState immersiveState = TableState.IDLE;
-
     @Unique
     private ItemStack targetItem = ItemStack.EMPTY;
 
+    @Unique
+    private final List<Integer> runeSequence = new ArrayList<>();
+
     protected EnchantingTableBlockEntityMixin(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
         super(type, pos, blockState);
+    }
+
+    @Override
+    public List<Integer> getRuneSequence() {
+        return this.runeSequence;
+    }
+
+    @Override
+    public void addRuneToSequence(int index) {
+        this.runeSequence.add(index);
+        this.setChanged();
+    }
+
+    @Override
+    public void clearRuneSequence() {
+        this.runeSequence.clear();
+        this.setChanged();
     }
 
     @Override
@@ -77,6 +101,8 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
                     registries.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE),
                     this.targetItem
             ).result().ifPresent(itemTag -> tag.put(ITEM_KEY, itemTag));
+        } else {
+            tag.remove(ITEM_KEY);
         }
 
         return tag;
@@ -98,6 +124,7 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
         );
 
         this.targetItem = input.read(ITEM_KEY, ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
+        this.runeSequence.clear();
     }
 
     @Nullable

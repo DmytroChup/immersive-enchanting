@@ -44,7 +44,7 @@ public class EnchantingTableBlockMixin {
                 if (!stack.isEmpty() && stack.isEnchantable()) {
                     ItemStack insertedItem = stack.split(1);
                     table.setTargetItem(insertedItem);
-                    table.transitionTo(TableState.ITEM_INSERTED);
+                    table.transitionTo(TableState.RUNE_SELECTION);
                     table.syncToClients();
                 }
             }

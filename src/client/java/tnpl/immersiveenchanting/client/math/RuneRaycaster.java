@@ -8,6 +8,7 @@ import net.minecraft.world.phys.Vec3;
 import java.util.Optional;
 
 public class RuneRaycaster {
+    private RuneRaycaster() {}
 
     // Half the width of the rune hitbox (final size will be 0.4 x 0.4 x 0.4)
     public static final float RUNE_HITBOX_SIZE = 0.2f;
