@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 1,
-	"id": "immersive-enchanting",
+	"id": "immersiveenchanting",
 	"version": "${version}",
 	"name": "Immersive Enchanting",
 	"description": "This is an example description! Tell everyone what your mod is about!",
@@ -12,7 +12,7 @@
 		"sources": "https://github.com/FabricMC/fabric-example-mod"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/immersive-enchanting/icon.png",
+	"icon": "assets/immersiveenchanting/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
@@ -23,9 +23,9 @@
 		]
 	},
 	"mixins": [
-		"immersive-enchanting.mixins.json",
+		"immersiveenchanting.mixins.json",
 		{
-			"config": "immersive-enchanting.client.mixins.json",
+			"config": "immersiveenchanting.client.mixins.json",
 			"environment": "client"
 		}
 	],
