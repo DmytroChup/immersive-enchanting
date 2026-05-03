@@ -9,9 +9,8 @@ import java.util.Optional;
 
 public class RuneRaycaster {
     private RuneRaycaster() {}
-
-    // Half the width of the rune hitbox (final size will be 0.4 x 0.4 x 0.4)
-    public static final float RUNE_HITBOX_SIZE = 0.2f;
+    
+    public static final float RUNE_HITBOX_SIZE = 0.3f;
 
     /**
      * Calculates the virtual AABB of a rune in absolute world coordinates.
@@ -20,7 +19,7 @@ public class RuneRaycaster {
         float time = gameTime + partialTicks;
 
         // Orbit mathematics: radius and uniform angular distribution
-        double radius = 1.0;
+        double radius = 1.8;
         double angleDeg = (time * 2.0 + (360.0 / totalRunes) * runeIndex) % 360.0;
         double angleRad = Math.toRadians(angleDeg);
 

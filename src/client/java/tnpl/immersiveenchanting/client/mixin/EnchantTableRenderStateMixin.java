@@ -5,6 +5,7 @@ import net.minecraft.client.renderer.blockentity.state.EnchantTableRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
+import tnpl.immersiveenchanting.fsm.TableState;
 
 @Mixin(EnchantTableRenderState.class)
 public class EnchantTableRenderStateMixin implements IImmersiveRenderState {
@@ -21,6 +22,15 @@ public class EnchantTableRenderStateMixin implements IImmersiveRenderState {
     };
 
     @Unique
+    private final ItemStackRenderState magicCircleState = new ItemStackRenderState();
+
+    @Unique
+    private final ItemStackRenderState beamState = new ItemStackRenderState();
+
+    @Unique
+    private final ItemStackRenderState pillarState = new ItemStackRenderState();
+
+    @Unique
     private boolean immersiveActive = false;
 
     @Unique
@@ -34,6 +44,31 @@ public class EnchantTableRenderStateMixin implements IImmersiveRenderState {
 
     @Unique
     private float renderTime = 0.0f;
+
+    @Unique
+    private boolean runesVisible;
+
+    @Unique
+    private int animationTick;
+
+    @Unique
+    private TableState tableState = TableState.IDLE;
+
+    @Override
+    public int getAnimationTick() { return this.animationTick; }
+    @Override
+    public void setAnimationTick(int tick) { this.animationTick = tick; }
+
+    @Override
+    public TableState getTableState() { return this.tableState; }
+    @Override
+    public void setTableState(TableState state) { this.tableState = state; }
+
+    @Override
+    public boolean areRunesVisible() { return this.runesVisible; }
+
+    @Override
+    public void setRunesVisible(boolean visible) { this.runesVisible = visible; }
 
     @Override
     public ItemStackRenderState getImmersiveItemState() { return this.immersiveItemState; }
@@ -69,4 +104,11 @@ public class EnchantTableRenderStateMixin implements IImmersiveRenderState {
 
     @Override
     public void setRenderTime(float time) { this.renderTime = time; }
+
+    @Override
+    public ItemStackRenderState getMagicCircleState() { return this.magicCircleState; }
+    @Override
+    public ItemStackRenderState getBeamState() { return this.beamState; }
+    @Override
+    public ItemStackRenderState getPillarState() { return this.pillarState; }
 }

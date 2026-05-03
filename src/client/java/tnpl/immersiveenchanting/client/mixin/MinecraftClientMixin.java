@@ -86,7 +86,7 @@ public class MinecraftClientMixin {
         if (!(level.getBlockEntity(pos) instanceof IImmersiveTableData table)) {
             return -1;
         }
-        if (table.getState() == TableState.IDLE) {
+        if (table.getState() != TableState.RUNE_SELECTION) {
             return -1;
         }
 

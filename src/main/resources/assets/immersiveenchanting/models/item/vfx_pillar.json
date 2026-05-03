@@ -1,0 +1,23 @@
+{
+  "textures": {
+    "layer0": "immersiveenchanting:item/vfx_pillar2"
+  },
+  "elements": [
+    {
+      "from": [8, 0, 0],
+      "to": [8, 16, 16],
+      "faces": {
+        "west": {"uv": [0, 0, 16, 16], "texture": "#layer0"},
+        "east": {"uv": [16, 0, 0, 16], "texture": "#layer0"}
+      }
+    },
+    {
+      "from": [0, 0, 8],
+      "to": [16, 16, 8],
+      "faces": {
+        "north": {"uv": [16, 0, 0, 16], "texture": "#layer0"},
+        "south": {"uv": [0, 0, 16, 16], "texture": "#layer0"}
+      }
+    }
+  ]
+}

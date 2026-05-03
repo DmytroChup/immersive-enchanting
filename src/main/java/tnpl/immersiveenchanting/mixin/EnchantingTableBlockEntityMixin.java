@@ -42,11 +42,23 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
     private ItemStack targetItem = ItemStack.EMPTY;
 
     @Unique
+    private int animationTick = 0;
+
+    @Unique
     private final List<Integer> runeSequence = new ArrayList<>();
 
     protected EnchantingTableBlockEntityMixin(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
         super(type, pos, blockState);
     }
+
+    @Override
+    public int getAnimationTick() { return this.animationTick; }
+
+    @Override
+    public void setAnimationTick(int tick) { this.animationTick = tick; }
+
+    @Override
+    public void incrementAnimationTick() { this.animationTick++; }
 
     @Override
     public List<Integer> getRuneSequence() {

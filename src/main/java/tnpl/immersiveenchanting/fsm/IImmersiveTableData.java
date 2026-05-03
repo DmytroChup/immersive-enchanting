@@ -15,5 +15,9 @@ public interface IImmersiveTableData {
     void addRuneToSequence(int runeIndex);
     void clearRuneSequence();
 
+    int getAnimationTick();
+    void setAnimationTick(int tick);
+    void incrementAnimationTick();
+
     void syncToClients();
 }

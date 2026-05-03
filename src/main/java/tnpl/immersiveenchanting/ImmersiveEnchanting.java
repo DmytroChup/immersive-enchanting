@@ -21,11 +21,12 @@ import tnpl.immersiveenchanting.fsm.TableState;
 import tnpl.immersiveenchanting.network.RuneClickPayload;
 import tnpl.immersiveenchanting.recipe.RuneRecipe;
 import tnpl.immersiveenchanting.recipe.RuneRecipeRegistry;
+import tnpl.immersiveenchanting.registry.ModItems;
 
 import java.util.List;
 
 public class ImmersiveEnchanting implements ModInitializer {
-	public static final String MOD_ID = "immersive-enchanting";
+	public static final String MOD_ID = "immersiveenchanting";
 
 	// This logger is used to write text to the console and the log file.
 	// It is considered best practice to use your mod id as the logger's name.
@@ -34,6 +35,8 @@ public class ImmersiveEnchanting implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		ModItems.initialize();
+
 		PayloadTypeRegistry.serverboundPlay().register(RuneClickPayload.PACKET_TYPE, RuneClickPayload.PACKET_CODEC);
 
 		ServerPlayNetworking.registerGlobalReceiver(RuneClickPayload.PACKET_TYPE, (payload, context) ->
