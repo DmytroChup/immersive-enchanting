@@ -5,7 +5,9 @@
 	"client": [
 		"EnchantTableRendererMixin",
 		"EnchantTableRenderStateMixin",
-		"MinecraftClientMixin"
+		"ClientLevelMixin",
+		"LevelMixin",
+		"WeatherEffectRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

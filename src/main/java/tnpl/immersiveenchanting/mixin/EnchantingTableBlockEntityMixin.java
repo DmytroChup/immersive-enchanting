@@ -34,12 +34,14 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
     @Unique
     private static final String ITEM_KEY = "ImmersiveTargetItem";
     @Unique
-    private static final String SEQUENCE_KEY = "ImmersiveRuneSequence";
+    private static final String LAPIS_KEY = "ImmersiveLapisItem";
 
     @Unique
     private TableState immersiveState = TableState.IDLE;
     @Unique
     private ItemStack targetItem = ItemStack.EMPTY;
+    @Unique
+    private ItemStack lapisStack = ItemStack.EMPTY;
 
     @Unique
     private int animationTick = 0;
@@ -61,29 +63,15 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
     public void incrementAnimationTick() { this.animationTick++; }
 
     @Override
-    public List<Integer> getRuneSequence() {
-        return this.runeSequence;
-    }
-
-    @Override
-    public void addRuneToSequence(int index) {
-        this.runeSequence.add(index);
-        this.setChanged();
-    }
-
-    @Override
-    public void clearRuneSequence() {
-        this.runeSequence.clear();
-        this.setChanged();
-    }
-
-    @Override
     public TableState getState() { return this.immersiveState; }
 
     @Override
     public void transitionTo(TableState newState) {
-        this.immersiveState = newState;
-        this.setChanged();
+        if (this.immersiveState != newState) {
+            this.immersiveState = newState;
+            this.animationTick = 0;
+            this.setChanged();
+        }
     }
 
     @Override
@@ -92,6 +80,15 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
     @Override
     public void setTargetItem(ItemStack stack) {
         this.targetItem = stack;
+        this.setChanged();
+    }
+
+    @Override
+    public ItemStack getLapisStack() { return this.lapisStack; }
+
+    @Override
+    public void setLapisStack(ItemStack stack) {
+        this.lapisStack = stack;
         this.setChanged();
     }
 
@@ -105,16 +102,23 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
     @Override
     public @NonNull CompoundTag getUpdateTag(HolderLookup.@NonNull Provider registries) {
         CompoundTag tag = super.getUpdateTag(registries);
-
         tag.putString(STATE_KEY, this.immersiveState.name());
 
         if (!this.targetItem.isEmpty()) {
-            net.minecraft.world.item.ItemStack.OPTIONAL_CODEC.encodeStart(
+            ItemStack.OPTIONAL_CODEC.encodeStart(
                     registries.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE),
                     this.targetItem
             ).result().ifPresent(itemTag -> tag.put(ITEM_KEY, itemTag));
         } else {
             tag.remove(ITEM_KEY);
+        }
+
+        if (!this.lapisStack.isEmpty()) {
+            ItemStack.OPTIONAL_CODEC.encodeStart(registries.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE),
+                            this.lapisStack
+                    ).result().ifPresent(itemTag -> tag.put(LAPIS_KEY, itemTag));
+        } else {
+            tag.remove(LAPIS_KEY);
         }
 
         return tag;
@@ -127,15 +131,23 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
         if (!this.targetItem.isEmpty()) {
             output.store(ITEM_KEY, ItemStack.OPTIONAL_CODEC, this.targetItem);
         }
+        if (!this.lapisStack.isEmpty()) {
+            output.store(LAPIS_KEY, ItemStack.OPTIONAL_CODEC, this.lapisStack);
+        }
     }
 
     @Inject(method = "loadAdditional", at = @At("TAIL"))
     private void onLoadAdditional(ValueInput input, CallbackInfo ci) {
-        input.getString(STATE_KEY).ifPresent(stateStr ->
-                this.immersiveState = TableState.valueOf(stateStr)
-        );
+        input.getString(STATE_KEY).ifPresent(stateStr -> {
+            TableState incomingState = TableState.valueOf(stateStr);
+            if (this.immersiveState != incomingState) {
+                this.immersiveState = incomingState;
+                this.animationTick = 0;
+            }
+        });
 
         this.targetItem = input.read(ITEM_KEY, ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
+        this.lapisStack = input.read(LAPIS_KEY, ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
         this.runeSequence.clear();
     }
 

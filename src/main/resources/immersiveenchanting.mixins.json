@@ -4,7 +4,10 @@
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
 		"EnchantingTableBlockMixin",
-		"EnchantingTableBlockEntityMixin"
+		"EnchantingTableBlockEntityMixin",
+		"EnchantmentMenuMixin",
+		"BlockMixin",
+		"BlockBehaviourMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

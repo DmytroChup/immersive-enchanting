@@ -16,6 +16,7 @@ public interface IImmersiveRenderState {
 
     // --- Rune Rendering Properties ---
     ItemStackRenderState getRuneItemState(int index);
+    ItemStackRenderState getOrbItemState(int index);
     float getRenderTime();
     void setRenderTime(float time);
 
@@ -29,6 +30,5 @@ public interface IImmersiveRenderState {
     void setTableState(TableState state);
 
     ItemStackRenderState getMagicCircleState();
-    ItemStackRenderState getBeamState();
     ItemStackRenderState getPillarState();
 }

@@ -22,6 +22,14 @@ public class EnchantTableRenderStateMixin implements IImmersiveRenderState {
     };
 
     @Unique
+    private final ItemStackRenderState[] orbItemStates = new ItemStackRenderState[] {
+            new ItemStackRenderState(),
+            new ItemStackRenderState(),
+            new ItemStackRenderState(),
+            new ItemStackRenderState()
+    };
+
+    @Unique
     private final ItemStackRenderState magicCircleState = new ItemStackRenderState();
 
     @Unique
@@ -38,9 +46,6 @@ public class EnchantTableRenderStateMixin implements IImmersiveRenderState {
 
     @Unique
     private float immersiveBobbing = 0.0f;
-
-    @Unique
-    private final ItemStackRenderState runeItemState = new ItemStackRenderState();
 
     @Unique
     private float renderTime = 0.0f;
@@ -100,6 +105,14 @@ public class EnchantTableRenderStateMixin implements IImmersiveRenderState {
     }
 
     @Override
+    public ItemStackRenderState getOrbItemState(int index) {
+        if (index >= 0 && index < orbItemStates.length) {
+            return this.orbItemStates[index];
+        }
+        return this.orbItemStates[0];
+    }
+
+    @Override
     public float getRenderTime() { return this.renderTime; }
 
     @Override
@@ -107,8 +120,6 @@ public class EnchantTableRenderStateMixin implements IImmersiveRenderState {
 
     @Override
     public ItemStackRenderState getMagicCircleState() { return this.magicCircleState; }
-    @Override
-    public ItemStackRenderState getBeamState() { return this.beamState; }
     @Override
     public ItemStackRenderState getPillarState() { return this.pillarState; }
 }

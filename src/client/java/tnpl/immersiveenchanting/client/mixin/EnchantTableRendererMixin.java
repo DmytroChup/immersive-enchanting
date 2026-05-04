@@ -2,6 +2,8 @@ package tnpl.immersiveenchanting.client.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import tnpl.immersiveenchanting.client.fsm.IImmersiveRenderState;
@@ -42,6 +44,14 @@ public class EnchantTableRendererMixin {
             Items.DIAMOND
     };
 
+    @Unique
+    private static final Item[] ORB_TYPES = {
+            ModItems.VFX_PURPLE_ORB,
+            ModItems.VFX_BLUE_ORB,
+            ModItems.VFX_YELLOW_ORB,
+            ModItems.VFX_LIGHT_BLUE_ORB
+    };
+
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onInit(BlockEntityRendererProvider.Context context, CallbackInfo ci) {
         this.itemModelResolver = context.itemModelResolver();
@@ -78,14 +88,22 @@ public class EnchantTableRendererMixin {
                 );
 
                 for (int i = 0; i < RUNE_TYPES.length; i++) {
-                    ItemStack runeStack = new ItemStack(RUNE_TYPES[i]);
                     this.itemModelResolver.updateForTopItem(
                             customState.getRuneItemState(i),
-                            runeStack,
+                            new ItemStack(RUNE_TYPES[i]),
                             ItemDisplayContext.FIXED,
                             blockEntity.getLevel(),
                             null,
                             seed + i + 1
+                    );
+
+                    this.itemModelResolver.updateForTopItem(
+                            customState.getOrbItemState(i),
+                            new ItemStack(ORB_TYPES[i]),
+                            ItemDisplayContext.FIXED,
+                            blockEntity.getLevel(),
+                            null,
+                            seed + i + 5
                     );
                 }
 
@@ -96,14 +114,6 @@ public class EnchantTableRendererMixin {
                         blockEntity.getLevel(),
                         null,
                         seed + 10
-                );
-                this.itemModelResolver.updateForTopItem(
-                        customState.getBeamState(),
-                        new ItemStack(ModItems.VFX_BEAM),
-                        ItemDisplayContext.FIXED,
-                        blockEntity.getLevel(),
-                        null,
-                        seed + 11
                 );
                 this.itemModelResolver.updateForTopItem(
                         customState.getPillarState(),
@@ -150,178 +160,168 @@ public class EnchantTableRendererMixin {
 
             float time = customState.getRenderTime();
             int tick = customState.getAnimationTick();
-            // Interpolate out of 100 ticks
-            float exactTick = tableState == TableState.ITEM_INSERTED ? tick + (time - (int) time) : 100f;
+            float exactTick = tick + (time - (int) time);
 
             int FULL_BRIGHT = 15728880;
             float tableCenterX = 0.5F;
             float tableCenterZ = 0.5F;
+            float itemYOffset = 1.2F + customState.getImmersiveBobbing();
 
-            // The target item levitates up dynamically
-            float baseItemY = 1.2F;
-            float itemYOffset = baseItemY + customState.getImmersiveBobbing();
-            if (exactTick > 60f && exactTick < 85f) {
-                // Suspense phase: levitate higher
-                float raiseProgress = (exactTick - 60f) / 25f;
-                itemYOffset += easeInOutCubic(raiseProgress) * 0.5f;
-            }
+            // 1. RENDER THE MAGIC CIRCLE BELOW
+            poseStack.pushPose();
+            poseStack.translate(tableCenterX, 0.76F, tableCenterZ);
+            poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
+            poseStack.mulPose(Axis.ZP.rotationDegrees(time * 1.5F));
+            float circleScale = 3.0f + Mth.sin(time * 0.2f) * 0.1f;
+            poseStack.scale(circleScale, circleScale, 1.0f);
+            customState.getMagicCircleState().submit(poseStack, submitNodeCollector, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
+            poseStack.popPose();
 
-            // ==========================================
-            // 1. RENDER MAGIC CIRCLE
-            // ==========================================
-            if (exactTick > 0.0f) {
-                poseStack.pushPose();
-                // Magic circle sits right above the table mesh
-                poseStack.translate(tableCenterX, 0.76F, tableCenterZ);
-
-                // IMPORTANT: The texture must lay flat.
-                poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
-                poseStack.mulPose(Axis.ZP.rotationDegrees(time * 1.5F)); // Slow ambient rotation
-
-                float circleScale;
-                if (exactTick < 20.0f) {
-                    circleScale = easeOutBack(exactTick / 20.0f) * 3.0f;
-                } else {
-                    // Pulsing effect based on time
-                    circleScale = 3.0f + Mth.sin(time * 0.2f) * 0.1f;
-                }
-
-                poseStack.scale(circleScale, circleScale, 1.0f); // 1.0f on Z since it's flat
-                customState.getMagicCircleState().submit(poseStack, submitNodeCollector, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
-                poseStack.popPose();
-            }
-
-            // ==========================================
             // 2. RENDER THE CENTRAL ITEM
-            // ==========================================
             if (!customState.getImmersiveItemState().isEmpty()) {
                 poseStack.pushPose();
                 poseStack.translate(tableCenterX, itemYOffset, tableCenterZ);
-
                 poseStack.scale(0.5F, 0.5F, 0.5F);
-
-                float itemSpin = customState.getImmersiveAngle();
-                if (exactTick > 60f && exactTick < 85f) {
-                    // Item spins violently during suspense
-                    itemSpin += (exactTick - 60f) * 20f;
-                }
-
-                poseStack.mulPose(Axis.YP.rotationDegrees(itemSpin));
+                poseStack.mulPose(Axis.YP.rotationDegrees(customState.getImmersiveAngle()));
                 customState.getImmersiveItemState().submit(poseStack, submitNodeCollector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
                 poseStack.popPose();
             }
 
-            // ==========================================
-            // 3. RUNE ORBITS AND BEAMS
-            // ==========================================
-            float radius;
-            float runeYPos = itemYOffset;
-            float spinAngle = time * 2.0f;
+            // 3. RUNE APPEARANCE ANIMATION (READY_TO_ENCHANT)
+            if (tableState == TableState.READY_TO_ENCHANT && customState.areRunesVisible()) {
 
-            if (tableState == TableState.ITEM_INSERTED) {
-                if (exactTick < 20.0f) {
-                    // Runes haven't appeared yet
-                    radius = 0.0f;
-                } else if (exactTick < 60.0f) {
-                    // Emergence
-                    float prog = (exactTick - 20.0f) / 40.0f;
-                    radius = easeOutBack(prog) * 1.8f;
-                    runeYPos = itemYOffset + Mth.sin(prog * (float)Math.PI) * 0.5f;
-                    spinAngle = time * 3.0f;
-                } else if (exactTick < 85.0f) {
-                    // Suspense: Holding position, intense spin
-                    radius = 1.8f;
-                    runeYPos = itemYOffset;
-                    spinAngle = time * 8.0f; // Fast spin
-                } else {
-                    // Slam inward
-                    float prog = (exactTick - 85.0f) / 15.0f;
-                    radius = 1.8f * (1.0f - easeInOutCubic(prog)); // Suck into the sword
-                    spinAngle = time * 15.0f;
-                }
-            } else {
-                // IDLE/RUNE_SELECTION state
-                radius = 1.8f;
-                runeYPos = itemYOffset;
-            }
+                float pillarWidth = 0.0f;
 
-            if (customState.areRunesVisible() && radius > 0.05f) {
                 for (int i = 0; i < 4; i++) {
-                    if (!customState.getRuneItemState(i).isEmpty()) {
-                        double angleRad = Math.toRadians((spinAngle + (90.0 * i)) % 360.0);
-                        float runeX = tableCenterX + (float) Math.cos(angleRad) * radius;
-                        float runeZ = tableCenterZ + (float) Math.sin(angleRad) * radius;
+                    if (customState.getRuneItemState(i).isEmpty()) continue;
 
-                        // --- DRAW BEAMS (Rune to Item) ---
-                        if (tableState == TableState.ITEM_INSERTED && exactTick > 30.0f && exactTick < 85.0f) {
-                            poseStack.pushPose();
-                            poseStack.translate(runeX, runeYPos, runeZ);
+                    poseStack.pushPose();
 
-                            float dirX = tableCenterX - runeX;
-                            float dirY = itemYOffset - runeYPos;
-                            float dirZ = tableCenterZ - runeZ;
+                    // Coordinates of the table corners from which the balls are launched
+                    float startDx = (i % 2 == 0 ? 2.5f : -2.5f);
+                    float startDz = (i < 2 ? 2.5f : -2.5f);
 
-                            float distance = Mth.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
-                            float horizontalDistance = Mth.sqrt(dirX * dirX + dirZ * dirZ);
+                    float runeX, runeY, runeZ;
+                    boolean drawEnergyShell = false;
 
-                            float yaw = (float) (-Math.atan2(dirX, dirZ));
-                            float pitch = (float) (-Math.atan2(dirY, horizontalDistance));
+                    if (exactTick < 20.0f) {
+                        // PHASE 1 (0-20): The balls fly from the void toward the sword
+                        float prog = exactTick / 20.0f;
+                        float invProg = 1.0f - easeOutBack(prog);
 
-                            poseStack.mulPose(Axis.YP.rotation(yaw));
-                            poseStack.mulPose(Axis.XP.rotation(pitch));
+                        // Target orbit at the center (very narrow, radius 0.4)
+                        double targetAngle = Math.toRadians((time * 15.0f + (90.0 * i)) % 360.0);
+                        float targetX = (float) Math.cos(targetAngle) * 0.4f;
+                        float targetZ = (float) Math.sin(targetAngle) * 0.4f;
 
-                            poseStack.translate(0.0F, 0.0F, distance / 2.0F);
+                        runeX = tableCenterX + (startDx * invProg) + (targetX * prog);
+                        runeY = itemYOffset + (2.0f * invProg);
+                        runeZ = tableCenterZ + (startDz * invProg) + (targetZ * prog);
+                        drawEnergyShell = true;
 
-                            float beamThickness = 0.2f + Mth.sin(time * 0.5f) * 0.1f;
-                            if (exactTick > 60f) beamThickness += 0.3f;
+                    } else if (exactTick < 40.0f) {
+                        // PHASE 2 (20–40): The balls spin wildly around the item
+                        double angleRad = Math.toRadians((time * 20.0f + (90.0 * i)) % 360.0);
+                        runeX = tableCenterX + (float) Math.cos(angleRad) * 0.4f;
+                        runeY = itemYOffset + Mth.sin(time * 0.5f) * 0.1f;
+                        runeZ = tableCenterZ + (float) Math.sin(angleRad) * 0.4f;
+                        drawEnergyShell = true;
 
-                            poseStack.scale(beamThickness, beamThickness, distance);
+                    } else if (exactTick < 60.0f) {
+                        // PHASE 3 (40–60): A beam of light strikes, scattering the runes into a wide orbit
+                        float prog = (exactTick - 40.0f) / 20.0f;
 
-                            customState.getBeamState().submit(poseStack, submitNodeCollector, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
-                            poseStack.popPose();
+                        // Runes gradually move away from 0.4 to 1.8 and slow down the rotation
+                        double angleRad = Math.toRadians((time * 3.0f + (1.0f - prog) * 17.0f + (90.0 * i)) % 360.0);
+                        float currentRadius = 0.4f + easeOutBack(prog) * 1.4f;
+
+                        runeX = tableCenterX + (float) Math.cos(angleRad) * currentRadius;
+                        runeY = itemYOffset + Mth.sin(time * 0.1f) * 0.2f;
+                        runeZ = tableCenterZ + (float) Math.sin(angleRad) * currentRadius;
+
+                        // The shell falls off during the first third of the flight
+                        if (prog < 0.3f) drawEnergyShell = true;
+
+                        // Animation of the light beam expanding and contracting (Pillar)
+                        float pillarProg = Math.min(1.0f, (exactTick - 40.0f) / 10.0f);
+                        if (exactTick < 50.0f) {
+                            pillarWidth = easeInOutCubic(pillarProg) * 1.5f;
+                        } else {
+                            float shrinkProg = (exactTick - 50.0f) / 10.0f;
+                            pillarWidth = (1.0f - easeInOutCubic(shrinkProg)) * 1.5f;
                         }
 
-                        // --- DRAW RUNE ---
+                    } else {
+                        // PHASE 4 (60+): A steady, endless cycle of completed runes
+                        double angleRad = Math.toRadians((time * 3.0f + (90.0 * i)) % 360.0);
+                        runeX = tableCenterX + (float) Math.cos(angleRad) * 1.8f;
+                        runeY = itemYOffset + Mth.sin(time * 0.1f) * 0.2f;
+                        runeZ = tableCenterZ + (float) Math.sin(angleRad) * 1.8f;
+                    }
+
+                    poseStack.translate(runeX, runeY, runeZ);
+
+                    if (drawEnergyShell) {
                         poseStack.pushPose();
-                        poseStack.translate(runeX, runeYPos, runeZ);
-                        poseStack.mulPose(Axis.YP.rotationDegrees(time * 5.0f)); // Self rotation
+
+                        Camera mainCamera = Minecraft.getInstance().gameRenderer.getMainCamera();
+
+                        // Rotate the sphere so that it ALWAYS faces the player directly
+                        poseStack.mulPose(Axis.YP.rotationDegrees(-mainCamera.yRot()));
+                        poseStack.mulPose(Axis.XP.rotationDegrees(mainCamera.xRot()));
+
+                        poseStack.mulPose(Axis.ZP.rotationDegrees(time * 15.0f));
+
+                        float orbScale = 0.45f;
+                        poseStack.scale(orbScale, orbScale, orbScale);
+                        customState.getOrbItemState(i).submit(poseStack, submitNodeCollector, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
+
+                        poseStack.popPose();
+                    } else {
+                        poseStack.mulPose(Axis.YP.rotationDegrees(time * 5.0f));
+                        poseStack.mulPose(Axis.ZP.rotationDegrees(Mth.sin(time * 0.1f) * 15.0f));
 
                         float scale = 0.3f;
                         poseStack.scale(scale, scale, scale);
                         customState.getRuneItemState(i).submit(poseStack, submitNodeCollector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
-                        poseStack.popPose();
                     }
+
+                    poseStack.popPose();
+                }
+
+                // ILLUSTRATION OF A PILLAR OF LIGHT IN THE CENTER
+                if (pillarWidth > 0.01f) {
+                    poseStack.pushPose();
+                    float pillarHeight = 15.0f;
+                    poseStack.translate(tableCenterX, 0.76F + (pillarHeight / 2.0f), tableCenterZ);
+                    poseStack.scale(pillarWidth, pillarHeight, pillarWidth);
+                    customState.getPillarState().submit(poseStack, submitNodeCollector, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
+                    poseStack.popPose();
                 }
             }
 
-            // ==========================================
-            // 4. THE CLIMAX PILLAR
-            // ==========================================
-            if (tableState == TableState.ITEM_INSERTED && exactTick >= 85.0f) {
-                poseStack.pushPose();
-
-                float flashProgress = (exactTick - 85.0f) / 15.0f;
-                float pillarWidth = 4.0f * (1.0f - easeInOutCubic(flashProgress));
-                float pillarHeight = 20.0f;
-
-                poseStack.translate(tableCenterX, 0.76F + (pillarHeight / 2.0F), tableCenterZ);
-                poseStack.scale(pillarWidth, pillarHeight, pillarWidth);
-
-                customState.getPillarState().submit(poseStack, submitNodeCollector, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
-                poseStack.popPose();
+            if (tableState == TableState.CRAFTING) {
             }
         }
     }
 
-    // Helper for smooth bouncy animations
+    /**
+     * easeInOutCubic: Accelerates smoothly at the beginning and decelerates smoothly at the end.
+     * Ideal for light rays, zooming, and smooth transitions.
+     */
+    @Unique
+    private float easeInOutCubic(float x) {
+        return x < 0.5f ? 4f * x * x * x : 1f - (float)Math.pow(-2f * x + 2f, 3f) / 2f;
+    }
+
+    /**
+     * easeOutBack: Fades out slightly beyond the target point and bounces back.
+     * Creates a cool “spring” or rebound effect. We use this for runes flying into orbit.
+     */
+    @Unique
     private float easeOutBack(float x) {
         float c1 = 1.70158f;
         float c3 = c1 + 1f;
-        return 1f + c3 * (float)Math.pow(x - 1, 3) + c1 * (float)Math.pow(x - 1, 2);
-    }
-
-    // Helper for smooth S-curve animations
-    private float easeInOutCubic(float x) {
-        return x < 0.5f ? 4f * x * x * x : 1f - (float)Math.pow(-2f * x + 2f, 3f) / 2f;
+        return 1f + c3 * (float)Math.pow(x - 1f, 3f) + c1 * (float)Math.pow(x - 1f, 2f);
     }
 }
