@@ -11,6 +11,9 @@ import tnpl.immersiveenchanting.ImmersiveEnchanting;
 import java.util.function.Function;
 
 public class ModItems {
+    private ModItems() {
+        /* This utility class should not be instantiated */
+    }
 
     public static final Item VFX_MAGIC_CIRCLE = registerItem("vfx_magic_circle", Item::new, new Item.Properties());
     public static final Item VFX_PILLAR = registerItem("vfx_pillar", Item::new, new Item.Properties());

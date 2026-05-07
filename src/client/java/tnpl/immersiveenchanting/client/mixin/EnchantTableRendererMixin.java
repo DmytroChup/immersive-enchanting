@@ -19,7 +19,6 @@ import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.EnchantingTableBlockEntity;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -300,6 +299,79 @@ public class EnchantTableRendererMixin {
             }
 
             if (tableState == TableState.CRAFTING) {
+                float clampedTick = Math.min(exactTick, 60.0f);
+
+                float levitation;
+                if (clampedTick < 40.0f) {
+                    // Smooth fade-in (0–40 ticks)
+                    levitation = easeInOutCubic(clampedTick / 40.0f) * 0.6f;
+                } else {
+                    // Smooth descent back down (40–60 ticks)
+                    float fallProg = (clampedTick - 40.0f) / 20.0f;
+                    levitation = 0.6f * (1.0f - easeInOutCubic(fallProg));
+                }
+
+                // STEP 1: ITEM ANIMATION
+                if (!customState.getImmersiveItemState().isEmpty()) {
+                    poseStack.pushPose();
+
+                    float rotationX = clampedTick > 40.0f ? easeInOutCubic((clampedTick - 40.0f) / 20.0f) * 360.0f : 0.0f;
+                    float extraSpin = clampedTick > 40.0f ? easeInOutCubic((clampedTick - 40.0f) / 20.0f) * 720.0f : 0.0f;
+                    float swordSpin = customState.getImmersiveAngle() + extraSpin;
+
+                    // Item uses the overall levitation height
+                    poseStack.translate(tableCenterX, itemYOffset + levitation, tableCenterZ);
+                    poseStack.scale(0.5F, 0.5F, 0.5F);
+
+                    poseStack.mulPose(Axis.YP.rotationDegrees(swordSpin));
+                    poseStack.mulPose(Axis.XP.rotationDegrees(rotationX));
+
+                    customState.getImmersiveItemState().submit(poseStack, submitNodeCollector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+                    poseStack.popPose();
+                }
+
+                // STEP 2: RUNE ANIMATION
+                if (clampedTick < 40.0f && customState.areRunesVisible()) {
+                    for (int i = 0; i < 4; i++) {
+                        if (customState.getRuneItemState(i).isEmpty()) continue;
+
+                        poseStack.pushPose();
+
+                        float currentRadius;
+                        double angleRad;
+                        float pullIn = 1.0f;
+
+                        if (clampedTick < 30.0f) {
+                            // PUSH (0-30): They spin and move away
+                            float buildUpProg = clampedTick / 30.0f;
+                            currentRadius = 1.4f + (buildUpProg * 0.4f);
+                            angleRad = Math.toRadians((time * (3.0f + buildUpProg * 25.0f) + (90.0 * i)) % 360.0);
+                        } else {
+                            // VACUUM (30–40): They suddenly veer toward the center
+                            float pullProg = (clampedTick - 30.0f) / 10.0f;
+                            pullIn = 1.0f - easeInOutCubic(pullProg);
+                            currentRadius = 1.8f * pullIn;
+                            angleRad = Math.toRadians((time * 28.0f + (90.0 * i)) % 360.0);
+                        }
+
+                        float runeX = tableCenterX + (float) Math.cos(angleRad) * currentRadius;
+                        float runeZ = tableCenterZ + (float) Math.sin(angleRad) * currentRadius;
+
+                        float runeY = itemYOffset + levitation + (Mth.sin(time * 0.1f) * 0.2f * pullIn);
+
+                        poseStack.translate(runeX, runeY, runeZ);
+
+                        float shake = clampedTick > 20.0f && clampedTick < 30.0f ? Mth.sin(time * 50.0f) * 8.0f : 0.0f;
+                        poseStack.mulPose(Axis.YP.rotationDegrees((time * 20.0f) + shake));
+                        poseStack.mulPose(Axis.ZP.rotationDegrees(time * 20.0f));
+
+                        float scale = clampedTick >= 30.0f ? 0.3f * pullIn : 0.3f;
+                        poseStack.scale(scale, scale, scale);
+
+                        customState.getRuneItemState(i).submit(poseStack, submitNodeCollector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+                        poseStack.popPose();
+                    }
+                }
             }
         }
     }
