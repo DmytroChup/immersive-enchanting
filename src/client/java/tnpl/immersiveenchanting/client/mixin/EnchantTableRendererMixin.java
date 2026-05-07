@@ -38,10 +38,10 @@ public class EnchantTableRendererMixin {
 
     @Unique
     private static final Item[] RUNE_TYPES = {
-            Items.AMETHYST_SHARD,
-            Items.LAPIS_LAZULI,
-            Items.GOLD_INGOT,
-            Items.DIAMOND
+            ModItems.RUNE_VOID,
+            ModItems.RUNE_DEEP_SEA,
+            ModItems.RUNE_FIRE,
+            ModItems.RUNE_WATER
     };
 
     @Unique
@@ -231,9 +231,8 @@ public class EnchantTableRendererMixin {
                         // PHASE 3 (40–60): A beam of light strikes, scattering the runes into a wide orbit
                         float prog = (exactTick - 40.0f) / 20.0f;
 
-                        // Runes gradually move away from 0.4 to 1.8 and slow down the rotation
                         double angleRad = Math.toRadians((time * 3.0f + (1.0f - prog) * 17.0f + (90.0 * i)) % 360.0);
-                        float currentRadius = 0.4f + easeOutBack(prog) * 1.4f;
+                        float currentRadius = 0.4f + easeOutBack(prog) * 1.0f;
 
                         runeX = tableCenterX + (float) Math.cos(angleRad) * currentRadius;
                         runeY = itemYOffset + Mth.sin(time * 0.1f) * 0.2f;
@@ -254,9 +253,9 @@ public class EnchantTableRendererMixin {
                     } else {
                         // PHASE 4 (60+): A steady, endless cycle of completed runes
                         double angleRad = Math.toRadians((time * 3.0f + (90.0 * i)) % 360.0);
-                        runeX = tableCenterX + (float) Math.cos(angleRad) * 1.8f;
+                        runeX = tableCenterX + (float) Math.cos(angleRad) * 1.4f;
                         runeY = itemYOffset + Mth.sin(time * 0.1f) * 0.2f;
-                        runeZ = tableCenterZ + (float) Math.sin(angleRad) * 1.8f;
+                        runeZ = tableCenterZ + (float) Math.sin(angleRad) * 1.4f;
                     }
 
                     poseStack.translate(runeX, runeY, runeZ);

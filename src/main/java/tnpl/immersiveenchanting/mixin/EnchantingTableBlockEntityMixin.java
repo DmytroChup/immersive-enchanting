@@ -46,9 +46,6 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
     @Unique
     private int animationTick = 0;
 
-    @Unique
-    private final List<Integer> runeSequence = new ArrayList<>();
-
     protected EnchantingTableBlockEntityMixin(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
         super(type, pos, blockState);
     }
@@ -148,7 +145,6 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
 
         this.targetItem = input.read(ITEM_KEY, ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
         this.lapisStack = input.read(LAPIS_KEY, ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
-        this.runeSequence.clear();
     }
 
     @Nullable
