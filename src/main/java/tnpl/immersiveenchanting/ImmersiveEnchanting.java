@@ -5,6 +5,7 @@ import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tnpl.immersiveenchanting.registry.ModItems;
+import tnpl.immersiveenchanting.registry.ModSounds;
 
 public class ImmersiveEnchanting implements ModInitializer {
 	public static final String MOD_ID = "immersiveenchanting";
@@ -17,5 +18,6 @@ public class ImmersiveEnchanting implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		ModItems.initialize();
+		ModSounds.initialize();
 	}
 }

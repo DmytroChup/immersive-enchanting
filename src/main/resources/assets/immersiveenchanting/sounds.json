@@ -1,0 +1,10 @@
+{
+  "craft_implosion": {
+    "subtitle": "sound.immersiveenchanting.craft_implosion",
+    "sounds": ["immersiveenchanting:implosion"]
+  },
+  "craft_success": {
+    "subtitle": "sound.immersiveenchanting.enchant_success",
+    "sounds": ["immersiveenchanting:enchant_success"]
+  }
+}
