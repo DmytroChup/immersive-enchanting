@@ -20,6 +20,11 @@ public class ModItems {
     public static final Item VFX_BLUE_ORB = registerItem("vfx_blue_orb", Item::new, new Item.Properties());
     public static final Item VFX_PURPLE_ORB = registerItem("vfx_purple_orb", Item::new, new Item.Properties());
 
+    public static final Item RUNE_VOID = registerItem("rune_void", Item::new, new Item.Properties());
+    public static final Item RUNE_DEEP_SEA = registerItem("rune_deep_sea", Item::new, new Item.Properties());
+    public static final Item RUNE_FIRE = registerItem("rune_fire", Item::new, new Item.Properties());
+    public static final Item RUNE_WATER = registerItem("rune_water", Item::new, new Item.Properties());
+
     public static <T extends Item> T registerItem(String name, Function<Item.Properties, T> itemFactory, Item.Properties settings) {
         ResourceKey<Item> itemKey = ResourceKey.create(
                 Registries.ITEM,
