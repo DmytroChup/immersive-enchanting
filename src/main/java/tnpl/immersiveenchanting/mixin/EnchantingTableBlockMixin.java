@@ -30,12 +30,18 @@ import tnpl.immersiveenchanting.registry.ModSounds;
 @Mixin(EnchantingTableBlock.class)
 public class EnchantingTableBlockMixin {
 
-    @Inject(method = "getTicker", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getTicker", at = @At("RETURN"), cancellable = true)
     private <T extends BlockEntity> void interceptGetTicker(
             Level level, BlockState state, BlockEntityType<T> type,
             CallbackInfoReturnable<BlockEntityTicker<T>> cir
     ) {
+        BlockEntityTicker<T> vanillaTicker = cir.getReturnValue();
+
         cir.setReturnValue((lvl, pos, blockState, blockEntity) -> {
+            if (vanillaTicker != null) {
+                vanillaTicker.tick(lvl, pos, blockState, blockEntity);
+            }
+
             if (blockEntity instanceof IImmersiveTableData table) {
 
                 if (lvl.isClientSide() && table.getState() == TableState.IDLE) {
