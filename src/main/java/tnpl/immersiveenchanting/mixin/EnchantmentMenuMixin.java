@@ -119,7 +119,7 @@ public abstract class EnchantmentMenuMixin {
         this.isCraftingTransition = false;
 
         if (Boolean.TRUE.equals(cir.getReturnValue())) {
-            if (player instanceof ServerPlayer serverPlayer) {
+            if (!player.level().isClientSide() && player instanceof ServerPlayer serverPlayer) {
                 serverPlayer.closeContainer();
             }
         }
