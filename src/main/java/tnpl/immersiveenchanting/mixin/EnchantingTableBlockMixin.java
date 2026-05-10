@@ -1,14 +1,19 @@
 package tnpl.immersiveenchanting.mixin;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.phys.BlockHitResult;
 import tnpl.immersiveenchanting.MagicAtmosphere;
 import tnpl.immersiveenchanting.fsm.IImmersiveTableData;
 import tnpl.immersiveenchanting.fsm.TableState;
@@ -152,5 +157,41 @@ public class EnchantingTableBlockMixin {
                 }
             }
         });
+    }
+
+    @Inject(method = "useWithoutItem", at = @At("HEAD"), cancellable = true)
+    private void onRightClick(BlockState state,
+                              Level level,
+                              BlockPos pos,
+                              Player player,
+                              BlockHitResult hitResult,
+                              CallbackInfoReturnable<InteractionResult> cir
+    ) {
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+        if (blockEntity instanceof IImmersiveTableData tableData) {
+            TableState currentState = tableData.getState();
+
+            if (currentState == TableState.CRAFTING && tableData.getAnimationTick() < 60) {
+                cir.setReturnValue(InteractionResult.SUCCESS);
+                return;
+            }
+
+            if (currentState == TableState.CRAFTING && tableData.getAnimationTick() >= 60) {
+                ItemStack targetItem = tableData.getTargetItem();
+
+                if (!targetItem.isEmpty()) {
+                    if (!level.isClientSide()) {
+
+                        player.getInventory().placeItemBackInInventory(targetItem.copy());
+
+                        tableData.setTargetItem(ItemStack.EMPTY);
+                        tableData.setAnimationTick(0);
+                        tableData.transitionTo(TableState.IDLE);
+                        tableData.syncToClients();
+                    }
+                    cir.setReturnValue(InteractionResult.SUCCESS);
+                }
+            }
+        }
     }
 }

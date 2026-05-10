@@ -1,10 +1,17 @@
 package tnpl.immersiveenchanting.mixin;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.EnchantmentMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -28,6 +35,9 @@ public abstract class EnchantmentMenuMixin {
     @Unique
     private boolean isInitializing = false;
 
+    @Unique
+    private boolean isCraftingTransition = false;
+
     @Inject(method = "<init>(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/inventory/ContainerLevelAccess;)V", at = @At("RETURN"))
     private void onInit(int syncId, net.minecraft.world.entity.player.Inventory playerInventory, ContainerLevelAccess access, CallbackInfo ci) {
         this.access.execute((level, pos) -> {
@@ -45,15 +55,39 @@ public abstract class EnchantmentMenuMixin {
         if (this.isClosing || this.isInitializing) return;
 
         if (container == this.enchantSlots) {
-            ItemStack targetItem = this.enchantSlots.getItem(0);
+            ItemStack slotItem = this.enchantSlots.getItem(0);
             ItemStack lapisStack = this.enchantSlots.getItem(1);
 
             this.access.execute((level, pos) -> {
                 if (level.getBlockEntity(pos) instanceof IImmersiveTableData tableData) {
 
-                    if (tableData.getState() == TableState.CRAFTING) return;
+                    if (this.isCraftingTransition) {
+                        tableData.setTargetItem(slotItem.copy());
+                        tableData.setLapisStack(lapisStack.copy());
+                        tableData.setAnimationTick(0);
+                        tableData.transitionTo(TableState.CRAFTING);
+                        tableData.syncToClients();
+                        return;
+                    }
 
-                    tableData.setTargetItem(targetItem.copy());
+                    if (tableData.getState() == TableState.CRAFTING) {
+                        if (slotItem.isEmpty()) {
+                            tableData.setTargetItem(ItemStack.EMPTY);
+                            tableData.setLapisStack(ItemStack.EMPTY);
+                            tableData.setAnimationTick(0);
+                            tableData.transitionTo(TableState.IDLE);
+                            tableData.syncToClients();
+                        } else {
+                            tableData.setTargetItem(slotItem.copy());
+                            tableData.setLapisStack(lapisStack.copy());
+                            tableData.syncToClients();
+                        }
+                        return;
+                    }
+
+                    ItemStack targetItem = (!slotItem.isEmpty() && slotItem.isEnchantable()) ? slotItem.copy() : ItemStack.EMPTY;
+
+                    tableData.setTargetItem(targetItem);
                     tableData.setLapisStack(lapisStack.copy());
 
                     TableState newState;
@@ -75,16 +109,19 @@ public abstract class EnchantmentMenuMixin {
         }
     }
 
+    @Inject(method = "clickMenuButton", at = @At("HEAD"))
+    private void onClickEnchantHead(Player player, int id, CallbackInfoReturnable<Boolean> cir) {
+        this.isCraftingTransition = true;
+    }
+
     @Inject(method = "clickMenuButton", at = @At("RETURN"))
     private void onClickEnchant(Player player, int id, CallbackInfoReturnable<Boolean> cir) {
+        this.isCraftingTransition = false;
+
         if (Boolean.TRUE.equals(cir.getReturnValue())) {
-            this.access.execute((level, pos) -> {
-                if (level.getBlockEntity(pos) instanceof IImmersiveTableData tableData) {
-                    tableData.setAnimationTick(0);
-                    tableData.transitionTo(TableState.CRAFTING);
-                    tableData.syncToClients();
-                }
-            });
+            if (player instanceof ServerPlayer serverPlayer) {
+                serverPlayer.closeContainer();
+            }
         }
     }
 
@@ -92,10 +129,16 @@ public abstract class EnchantmentMenuMixin {
     private void onRemoved(Player player, CallbackInfo ci) {
         this.isClosing = true;
 
-        // Clear the GUI slots. The vanilla code will attempt to drop items from the GUI,
-        // but the slots are already empty, so nothing will drop into the inventory.
-        // However, the items have already been safely saved in the BlockEntity in the previous step.
-        this.enchantSlots.setItem(0, ItemStack.EMPTY);
-        this.enchantSlots.setItem(1, ItemStack.EMPTY);
+        this.access.execute((level, pos) -> {
+            if (level.getBlockEntity(pos) instanceof IImmersiveTableData tableData) {
+
+                if (!tableData.getTargetItem().isEmpty()) {
+                    this.enchantSlots.setItem(0, ItemStack.EMPTY);
+                }
+                if (!tableData.getLapisStack().isEmpty()) {
+                    this.enchantSlots.setItem(1, ItemStack.EMPTY);
+                }
+            }
+        });
     }
 }

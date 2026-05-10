@@ -177,7 +177,7 @@ public class EnchantTableRendererMixin {
             poseStack.popPose();
 
             // 2. RENDER THE CENTRAL ITEM
-            if (!customState.getImmersiveItemState().isEmpty()) {
+            if (tableState != TableState.CRAFTING && !customState.getImmersiveItemState().isEmpty()) {
                 poseStack.pushPose();
                 poseStack.translate(tableCenterX, itemYOffset, tableCenterZ);
                 poseStack.scale(0.5F, 0.5F, 0.5F);
