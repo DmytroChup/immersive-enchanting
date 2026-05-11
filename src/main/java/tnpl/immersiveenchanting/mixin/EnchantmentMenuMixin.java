@@ -1,17 +1,11 @@
 package tnpl.immersiveenchanting.mixin;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.EnchantmentMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -60,28 +54,9 @@ public abstract class EnchantmentMenuMixin {
 
             this.access.execute((level, pos) -> {
                 if (level.getBlockEntity(pos) instanceof IImmersiveTableData tableData) {
+                    TableState currentState = tableData.getState();
 
-                    if (this.isCraftingTransition) {
-                        tableData.setTargetItem(slotItem.copy());
-                        tableData.setLapisStack(lapisStack.copy());
-                        tableData.setAnimationTick(0);
-                        tableData.transitionTo(TableState.CRAFTING);
-                        tableData.syncToClients();
-                        return;
-                    }
-
-                    if (tableData.getState() == TableState.CRAFTING) {
-                        if (slotItem.isEmpty()) {
-                            tableData.setTargetItem(ItemStack.EMPTY);
-                            tableData.setLapisStack(ItemStack.EMPTY);
-                            tableData.setAnimationTick(0);
-                            tableData.transitionTo(TableState.IDLE);
-                            tableData.syncToClients();
-                        } else {
-                            tableData.setTargetItem(slotItem.copy());
-                            tableData.setLapisStack(lapisStack.copy());
-                            tableData.syncToClients();
-                        }
+                    if(currentState == TableState.CRAFTING_FINISHED || currentState == TableState.CRAFTING) {
                         return;
                     }
 
@@ -109,16 +84,23 @@ public abstract class EnchantmentMenuMixin {
         }
     }
 
-    @Inject(method = "clickMenuButton", at = @At("HEAD"))
-    private void onClickEnchantHead(Player player, int id, CallbackInfoReturnable<Boolean> cir) {
-        this.isCraftingTransition = true;
-    }
-
     @Inject(method = "clickMenuButton", at = @At("RETURN"))
     private void onClickEnchant(Player player, int id, CallbackInfoReturnable<Boolean> cir) {
-        this.isCraftingTransition = false;
-
         if (Boolean.TRUE.equals(cir.getReturnValue())) {
+
+            ItemStack enchantedItem = this.enchantSlots.getItem(0);
+            ItemStack lapisStack = this.enchantSlots.getItem(1);
+
+            this.access.execute((level, pos) -> {
+                if (level.getBlockEntity(pos) instanceof IImmersiveTableData tableData) {
+                    tableData.setTargetItem(enchantedItem.copy());
+                    tableData.setLapisStack(lapisStack.copy());
+                    tableData.setAnimationTick(0);
+                    tableData.transitionTo(TableState.CRAFTING);
+                    tableData.syncToClients();
+                }
+            });
+
             if (!player.level().isClientSide() && player instanceof ServerPlayer serverPlayer) {
                 serverPlayer.closeContainer();
             }

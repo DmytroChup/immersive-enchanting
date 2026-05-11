@@ -32,6 +32,8 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
     private static final String ITEM_KEY = "ImmersiveTargetItem";
     @Unique
     private static final String LAPIS_KEY = "ImmersiveLapisItem";
+    @Unique
+    private static final String TICK_KEY = "ImmersiveAnimationTick";
 
     @Unique
     private TableState immersiveState = TableState.IDLE;
@@ -98,6 +100,8 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
         CompoundTag tag = super.getUpdateTag(registries);
         tag.putString(STATE_KEY, this.immersiveState.name());
 
+        tag.putInt(TICK_KEY, this.animationTick);
+
         if (!this.targetItem.isEmpty()) {
             ItemStack.OPTIONAL_CODEC.encodeStart(
                     registries.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE),
@@ -122,6 +126,8 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
     private void onSaveAdditional(ValueOutput output, CallbackInfo ci) {
         output.putString(STATE_KEY, this.immersiveState.name());
 
+        output.putInt(TICK_KEY, this.animationTick);
+
         if (!this.targetItem.isEmpty()) {
             output.store(ITEM_KEY, ItemStack.OPTIONAL_CODEC, this.targetItem);
         }
@@ -133,12 +139,10 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
     @Inject(method = "loadAdditional", at = @At("TAIL"))
     private void onLoadAdditional(ValueInput input, CallbackInfo ci) {
         input.getString(STATE_KEY).ifPresent(stateStr -> {
-            TableState incomingState = TableState.valueOf(stateStr);
-            if (this.immersiveState != incomingState) {
-                this.immersiveState = incomingState;
-                this.animationTick = 0;
-            }
+            this.immersiveState = TableState.valueOf(stateStr);
         });
+
+        input.getInt(TICK_KEY).ifPresent(tick -> this.animationTick = tick);
 
         this.targetItem = input.read(ITEM_KEY, ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
         this.lapisStack = input.read(LAPIS_KEY, ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);

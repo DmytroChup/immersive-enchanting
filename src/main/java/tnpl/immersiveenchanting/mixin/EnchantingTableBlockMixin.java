@@ -159,6 +159,11 @@ public class EnchantingTableBlockMixin {
                                     cx, cy + 0.6, cz, 0, 0, 0
                             );
                         }
+                    } else {
+                        if (craftTick >= 60) {
+                            table.transitionTo(TableState.CRAFTING_FINISHED);
+                            table.syncToClients();
+                        }
                     }
                 }
             }
@@ -182,7 +187,7 @@ public class EnchantingTableBlockMixin {
                 return;
             }
 
-            if (currentState == TableState.CRAFTING && tableData.getAnimationTick() >= 60) {
+            if (currentState == TableState.CRAFTING_FINISHED) {
                 ItemStack targetItem = tableData.getTargetItem();
 
                 if (!targetItem.isEmpty()) {
