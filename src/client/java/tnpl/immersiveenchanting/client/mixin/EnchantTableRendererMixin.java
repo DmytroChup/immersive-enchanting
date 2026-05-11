@@ -231,7 +231,7 @@ public class EnchantTableRendererMixin {
                         float prog = (exactTick - 40.0f) / 20.0f;
 
                         double angleRad = Math.toRadians((time * 3.0f + (1.0f - prog) * 17.0f + (90.0 * i)) % 360.0);
-                        float currentRadius = 0.4f + easeOutBack(prog) * 1.0f;
+                        float currentRadius = 0.4f + easeOutBack(prog);
 
                         runeX = tableCenterX + (float) Math.cos(angleRad) * currentRadius;
                         runeY = itemYOffset + Mth.sin(time * 0.1f) * 0.2f;
@@ -272,7 +272,8 @@ public class EnchantTableRendererMixin {
 
                         float orbScale = 0.45f;
                         poseStack.scale(orbScale, orbScale, orbScale);
-                        customState.getOrbItemState(i).submit(poseStack, submitNodeCollector, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
+                        customState.getOrbItemState(i).submit(poseStack, submitNodeCollector,
+                                FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
 
                         poseStack.popPose();
                     } else {
@@ -281,7 +282,8 @@ public class EnchantTableRendererMixin {
 
                         float scale = 0.3f;
                         poseStack.scale(scale, scale, scale);
-                        customState.getRuneItemState(i).submit(poseStack, submitNodeCollector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+                        customState.getRuneItemState(i).submit(poseStack, submitNodeCollector,
+                                state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
                     }
 
                     poseStack.popPose();
@@ -357,7 +359,10 @@ public class EnchantTableRendererMixin {
                         float runeX = tableCenterX + (float) Math.cos(angleRad) * currentRadius;
                         float runeZ = tableCenterZ + (float) Math.sin(angleRad) * currentRadius;
 
-                        float runeY = itemYOffset + levitation + (Mth.sin(time * 0.1f) * 0.2f * pullIn);
+                        float orbitY = itemYOffset + (levitation * 0.1f);
+                        float bladeTargetY = itemYOffset + levitation + 0.35f;
+
+                        float runeY = Mth.lerp(1.0f - pullIn, orbitY, bladeTargetY) + (Mth.sin(time * 0.1f) * 0.2f * pullIn);
 
                         poseStack.translate(runeX, runeY, runeZ);
 
