@@ -2,6 +2,7 @@ package tnpl.immersiveenchanting.mixin;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.block.EnchantingTableBlock;
@@ -31,12 +32,12 @@ public abstract class BlockBehaviourMixin {
 
             if (blockEntity instanceof IImmersiveTableData table) {
                 if (!table.getTargetItem().isEmpty()) {
-                    net.minecraft.world.Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), table.getTargetItem());
+                    Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), table.getTargetItem());
                     table.setTargetItem(ItemStack.EMPTY);
                 }
 
                 if (!table.getLapisStack().isEmpty()) {
-                    net.minecraft.world.Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), table.getLapisStack());
+                    Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), table.getLapisStack());
                     table.setLapisStack(ItemStack.EMPTY);
                 }
             }

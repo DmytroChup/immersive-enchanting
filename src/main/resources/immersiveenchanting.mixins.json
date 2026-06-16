@@ -2,12 +2,14 @@
 	"required": true,
 	"package": "tnpl.immersiveenchanting.mixin",
 	"compatibilityLevel": "JAVA_25",
+	"plugin": "tnpl.immersiveenchanting.mixin.ImmersiveEnchantingMixinPlugin",
 	"mixins": [
 		"EnchantingTableBlockMixin",
 		"EnchantingTableBlockEntityMixin",
 		"EnchantmentMenuMixin",
 		"BlockMixin",
-		"BlockBehaviourMixin"
+		"BlockBehaviourMixin",
+		"compat.EnchancementMenuCompatMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
