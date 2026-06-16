@@ -2,12 +2,14 @@
 	"required": true,
 	"package": "tnpl.immersiveenchanting.client.mixin",
 	"compatibilityLevel": "JAVA_25",
+	"plugin": "tnpl.immersiveenchanting.mixin.ImmersiveEnchantingMixinPlugin",
 	"client": [
 		"EnchantTableRendererMixin",
 		"EnchantTableRenderStateMixin",
 		"ClientLevelMixin",
 		"LevelMixin",
-		"WeatherEffectRendererMixin"
+		"WeatherEffectRendererMixin",
+		"compat.EnchancementScreenCompatMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

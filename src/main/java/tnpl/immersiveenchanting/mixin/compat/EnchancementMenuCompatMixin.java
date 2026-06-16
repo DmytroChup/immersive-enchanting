@@ -1,0 +1,125 @@
+package tnpl.immersiveenchanting.mixin.compat;
+
+import moriyashiine.enchancement.common.world.inventory.ModEnchantmentMenu;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import tnpl.immersiveenchanting.fsm.IImmersiveTableData;
+import tnpl.immersiveenchanting.fsm.TableState;
+
+@Mixin(ModEnchantmentMenu.class)
+public abstract class EnchancementMenuCompatMixin {
+
+    @Shadow @Final private ContainerLevelAccess access;
+    @Shadow @Final private Container enchantSlots;
+
+    @Unique
+    private boolean immersive$isClosing = false;
+
+    @Unique
+    private boolean immersive$isInitializing = false;
+
+    @Inject(method = "<init>(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/inventory/ContainerLevelAccess;Lnet/minecraft/world/level/Level;)V", at = @At("RETURN"))
+    private void onInit(int syncId, Inventory inventory, ContainerLevelAccess access, Level level, CallbackInfo ci) {
+        this.access.execute((lvl, pos) -> {
+            if (lvl.getBlockEntity(pos) instanceof IImmersiveTableData tableData) {
+                this.immersive$isInitializing = true;
+                this.enchantSlots.setItem(0, tableData.getTargetItem().copy());
+                this.enchantSlots.setItem(1, tableData.getLapisStack().copy());
+                this.immersive$isInitializing = false;
+            }
+        });
+    }
+
+    @Inject(method = "slotsChanged", at = @At("TAIL"))
+    private void onSlotsChanged(Container container, CallbackInfo ci) {
+        if (this.immersive$isClosing || this.immersive$isInitializing) return;
+
+        if (container == this.enchantSlots) {
+            ItemStack slotItem = this.enchantSlots.getItem(0);
+            ItemStack lapisStack = this.enchantSlots.getItem(1);
+
+            this.access.execute((level, pos) -> {
+                if (level.getBlockEntity(pos) instanceof IImmersiveTableData tableData) {
+                    TableState currentState = tableData.getState();
+
+                    if(currentState == TableState.CRAFTING_FINISHED || currentState == TableState.CRAFTING) {
+                        return;
+                    }
+
+                    ItemStack targetItem = (!slotItem.isEmpty() && ModEnchantmentMenu.isEnchantable(slotItem)) ? slotItem.copy() : ItemStack.EMPTY;
+
+                    tableData.setTargetItem(targetItem);
+                    tableData.setLapisStack(lapisStack.copy());
+
+                    TableState newState;
+                    if (!targetItem.isEmpty() && lapisStack.isEmpty()) {
+                        newState = TableState.ITEM_INSERTED;
+                    } else if (!targetItem.isEmpty() && !lapisStack.isEmpty()) {
+                        newState = TableState.READY_TO_ENCHANT;
+                    } else {
+                        newState = TableState.IDLE;
+                    }
+
+                    if (tableData.getState() != newState) {
+                        tableData.setAnimationTick(0);
+                        tableData.transitionTo(newState);
+                        tableData.syncToClients();
+                    }
+                }
+            });
+        }
+    }
+
+    @Inject(method = "clickMenuButton", at = @At("RETURN"))
+    private void onClickEnchant(Player player, int buttonId, CallbackInfoReturnable<Boolean> cir) {
+        if (buttonId == 0 && Boolean.TRUE.equals(cir.getReturnValue())) {
+
+            ItemStack enchantedItem = this.enchantSlots.getItem(0);
+            ItemStack lapisStack = this.enchantSlots.getItem(1);
+
+            this.access.execute((level, pos) -> {
+                if (level.getBlockEntity(pos) instanceof IImmersiveTableData tableData) {
+                    tableData.setTargetItem(enchantedItem.copy());
+                    tableData.setLapisStack(lapisStack.copy());
+                    tableData.setAnimationTick(0);
+                    tableData.transitionTo(TableState.CRAFTING);
+                    tableData.syncToClients();
+                }
+            });
+
+            if (!player.level().isClientSide() && player instanceof ServerPlayer serverPlayer) {
+                serverPlayer.closeContainer();
+            }
+        }
+    }
+
+    @Inject(method = "removed", at = @At("HEAD"))
+    private void onRemoved(Player player, CallbackInfo ci) {
+        this.immersive$isClosing = true;
+
+        this.access.execute((level, pos) -> {
+            if (level.getBlockEntity(pos) instanceof IImmersiveTableData tableData) {
+
+                if (!tableData.getTargetItem().isEmpty()) {
+                    this.enchantSlots.setItem(0, ItemStack.EMPTY);
+                }
+                if (!tableData.getLapisStack().isEmpty()) {
+                    this.enchantSlots.setItem(1, ItemStack.EMPTY);
+                }
+            }
+        });
+    }
+}
