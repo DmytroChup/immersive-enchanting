@@ -11,10 +11,10 @@ import tnpl.immersiveenchanting.fsm.TableState;
 public class EnchantTableRenderStateMixin implements IImmersiveRenderState {
 
     @Unique
-    private final ItemStackRenderState immersiveItemState = new ItemStackRenderState();
+    private final ItemStackRenderState immersive$immersiveItemState = new ItemStackRenderState();
 
     @Unique
-    private final ItemStackRenderState[] runeItemStates = new ItemStackRenderState[] {
+    private final ItemStackRenderState[] immersive$runeItemStates = new ItemStackRenderState[] {
             new ItemStackRenderState(),
             new ItemStackRenderState(),
             new ItemStackRenderState(),
@@ -22,7 +22,7 @@ public class EnchantTableRenderStateMixin implements IImmersiveRenderState {
     };
 
     @Unique
-    private final ItemStackRenderState[] orbItemStates = new ItemStackRenderState[] {
+    private final ItemStackRenderState[] immersive$orbItemStates = new ItemStackRenderState[] {
             new ItemStackRenderState(),
             new ItemStackRenderState(),
             new ItemStackRenderState(),
@@ -30,96 +30,96 @@ public class EnchantTableRenderStateMixin implements IImmersiveRenderState {
     };
 
     @Unique
-    private final ItemStackRenderState magicCircleState = new ItemStackRenderState();
+    private final ItemStackRenderState immersive$magicCircleState = new ItemStackRenderState();
 
     @Unique
-    private final ItemStackRenderState beamState = new ItemStackRenderState();
+    private final ItemStackRenderState immersive$beamState = new ItemStackRenderState();
 
     @Unique
-    private final ItemStackRenderState pillarState = new ItemStackRenderState();
+    private final ItemStackRenderState immersive$pillarState = new ItemStackRenderState();
 
     @Unique
-    private boolean immersiveActive = false;
+    private boolean immersive$immersiveActive = false;
 
     @Unique
-    private float immersiveAngle = 0.0f;
+    private float immersive$immersiveAngle = 0.0f;
 
     @Unique
-    private float immersiveBobbing = 0.0f;
+    private float immersive$immersiveBobbing = 0.0f;
 
     @Unique
-    private float renderTime = 0.0f;
+    private float immersive$renderTime = 0.0f;
 
     @Unique
-    private boolean runesVisible;
+    private boolean immersive$runesVisible;
 
     @Unique
-    private int animationTick;
+    private int immersive$animationTick;
 
     @Unique
-    private TableState tableState = TableState.IDLE;
+    private TableState immersive$tableState = TableState.IDLE;
 
     @Override
-    public int getAnimationTick() { return this.animationTick; }
+    public int getAnimationTick() { return this.immersive$animationTick; }
     @Override
-    public void setAnimationTick(int tick) { this.animationTick = tick; }
+    public void setAnimationTick(int tick) { this.immersive$animationTick = tick; }
 
     @Override
-    public TableState getTableState() { return this.tableState; }
+    public TableState getTableState() { return this.immersive$tableState; }
     @Override
-    public void setTableState(TableState state) { this.tableState = state; }
+    public void setTableState(TableState state) { this.immersive$tableState = state; }
 
     @Override
-    public boolean areRunesVisible() { return this.runesVisible; }
+    public boolean areRunesVisible() { return this.immersive$runesVisible; }
 
     @Override
-    public void setRunesVisible(boolean visible) { this.runesVisible = visible; }
+    public void setRunesVisible(boolean visible) { this.immersive$runesVisible = visible; }
 
     @Override
-    public ItemStackRenderState getImmersiveItemState() { return this.immersiveItemState; }
+    public ItemStackRenderState getImmersiveItemState() { return this.immersive$immersiveItemState; }
 
     @Override
-    public boolean isImmersiveActive() { return this.immersiveActive; }
+    public boolean isImmersiveActive() { return this.immersive$immersiveActive; }
 
     @Override
-    public void setImmersiveActive(boolean active) { this.immersiveActive = active; }
+    public void setImmersiveActive(boolean active) { this.immersive$immersiveActive = active; }
 
     @Override
-    public float getImmersiveAngle() { return this.immersiveAngle; }
+    public float getImmersiveAngle() { return this.immersive$immersiveAngle; }
 
     @Override
-    public void setImmersiveAngle(float angle) { this.immersiveAngle = angle; }
+    public void setImmersiveAngle(float angle) { this.immersive$immersiveAngle = angle; }
 
     @Override
-    public float getImmersiveBobbing() { return this.immersiveBobbing; }
+    public float getImmersiveBobbing() { return this.immersive$immersiveBobbing; }
 
     @Override
-    public void setImmersiveBobbing(float bobbing) { this.immersiveBobbing = bobbing; }
+    public void setImmersiveBobbing(float bobbing) { this.immersive$immersiveBobbing = bobbing; }
 
     @Override
     public ItemStackRenderState getRuneItemState(int index) {
-        if (index >= 0 && index < runeItemStates.length) {
-            return this.runeItemStates[index];
+        if (index >= 0 && index < immersive$runeItemStates.length) {
+            return this.immersive$runeItemStates[index];
         }
-        return this.runeItemStates[0];
+        return this.immersive$runeItemStates[0];
     }
 
     @Override
     public ItemStackRenderState getOrbItemState(int index) {
-        if (index >= 0 && index < orbItemStates.length) {
-            return this.orbItemStates[index];
+        if (index >= 0 && index < immersive$orbItemStates.length) {
+            return this.immersive$orbItemStates[index];
         }
-        return this.orbItemStates[0];
+        return this.immersive$orbItemStates[0];
     }
 
     @Override
-    public float getRenderTime() { return this.renderTime; }
+    public float getRenderTime() { return this.immersive$renderTime; }
 
     @Override
-    public void setRenderTime(float time) { this.renderTime = time; }
+    public void setRenderTime(float time) { this.immersive$renderTime = time; }
 
     @Override
-    public ItemStackRenderState getMagicCircleState() { return this.magicCircleState; }
+    public ItemStackRenderState getMagicCircleState() { return this.immersive$magicCircleState; }
     @Override
-    public ItemStackRenderState getPillarState() { return this.pillarState; }
+    public ItemStackRenderState getPillarState() { return this.immersive$pillarState; }
 }

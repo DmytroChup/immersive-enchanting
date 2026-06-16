@@ -24,29 +24,29 @@ public abstract class EnchantmentMenuMixin {
     @Shadow @Final private Container enchantSlots;
 
     @Unique
-    private boolean isClosing = false;
+    private boolean immersive$isClosing = false;
 
     @Unique
-    private boolean isInitializing = false;
+    private boolean immersive$isInitializing = false;
 
     @Unique
-    private boolean isCraftingTransition = false;
+    private boolean immersive$isCraftingTransition = false;
 
     @Inject(method = "<init>(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/inventory/ContainerLevelAccess;)V", at = @At("RETURN"))
     private void onInit(int syncId, net.minecraft.world.entity.player.Inventory playerInventory, ContainerLevelAccess access, CallbackInfo ci) {
         this.access.execute((level, pos) -> {
             if (level.getBlockEntity(pos) instanceof IImmersiveTableData tableData) {
-                this.isInitializing = true;
+                this.immersive$isInitializing = true;
                 this.enchantSlots.setItem(0, tableData.getTargetItem().copy());
                 this.enchantSlots.setItem(1, tableData.getLapisStack().copy());
-                this.isInitializing = false;
+                this.immersive$isInitializing = false;
             }
         });
     }
 
     @Inject(method = "slotsChanged", at = @At("TAIL"))
     private void onSlotsChanged(Container container, CallbackInfo ci) {
-        if (this.isClosing || this.isInitializing) return;
+        if (this.immersive$isClosing || this.immersive$isInitializing) return;
 
         if (container == this.enchantSlots) {
             ItemStack slotItem = this.enchantSlots.getItem(0);
@@ -109,7 +109,7 @@ public abstract class EnchantmentMenuMixin {
 
     @Inject(method = "removed", at = @At("HEAD"))
     private void onRemoved(Player player, CallbackInfo ci) {
-        this.isClosing = true;
+        this.immersive$isClosing = true;
 
         this.access.execute((level, pos) -> {
             if (level.getBlockEntity(pos) instanceof IImmersiveTableData tableData) {

@@ -33,10 +33,10 @@ import tnpl.immersiveenchanting.registry.ModItems;
 public class EnchantTableRendererMixin {
 
     @Unique
-    private ItemModelResolver itemModelResolver;
+    private ItemModelResolver immersive$itemModelResolver;
 
     @Unique
-    private static final Item[] RUNE_TYPES = {
+    private static final Item[] immersive$RUNE_TYPES = {
             ModItems.RUNE_VOID,
             ModItems.RUNE_DEEP_SEA,
             ModItems.RUNE_FIRE,
@@ -44,7 +44,7 @@ public class EnchantTableRendererMixin {
     };
 
     @Unique
-    private static final Item[] ORB_TYPES = {
+    private static final Item[] immersive$ORB_TYPES = {
             ModItems.VFX_PURPLE_ORB,
             ModItems.VFX_BLUE_ORB,
             ModItems.VFX_YELLOW_ORB,
@@ -53,7 +53,7 @@ public class EnchantTableRendererMixin {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onInit(BlockEntityRendererProvider.Context context, CallbackInfo ci) {
-        this.itemModelResolver = context.itemModelResolver();
+        this.immersive$itemModelResolver = context.itemModelResolver();
     }
 
     @Inject(method = "extractRenderState", at = @At("TAIL"))
@@ -73,11 +73,11 @@ public class EnchantTableRendererMixin {
             customState.setImmersiveActive(true);
             ItemStack targetItem = table.getTargetItem();
 
-            if (!targetItem.isEmpty() && this.itemModelResolver != null) {
+            if (!targetItem.isEmpty() && this.immersive$itemModelResolver != null) {
                 int seed = (int) blockEntity.getBlockPos().asLong();
 
                 // 1. Resolve Main Target Item
-                this.itemModelResolver.updateForTopItem(
+                this.immersive$itemModelResolver.updateForTopItem(
                         customState.getImmersiveItemState(),
                         targetItem,
                         ItemDisplayContext.FIXED,
@@ -86,19 +86,19 @@ public class EnchantTableRendererMixin {
                         seed
                 );
 
-                for (int i = 0; i < RUNE_TYPES.length; i++) {
-                    this.itemModelResolver.updateForTopItem(
+                for (int i = 0; i < immersive$RUNE_TYPES.length; i++) {
+                    this.immersive$itemModelResolver.updateForTopItem(
                             customState.getRuneItemState(i),
-                            new ItemStack(RUNE_TYPES[i]),
+                            new ItemStack(immersive$RUNE_TYPES[i]),
                             ItemDisplayContext.FIXED,
                             blockEntity.getLevel(),
                             null,
                             seed + i + 1
                     );
 
-                    this.itemModelResolver.updateForTopItem(
+                    this.immersive$itemModelResolver.updateForTopItem(
                             customState.getOrbItemState(i),
-                            new ItemStack(ORB_TYPES[i]),
+                            new ItemStack(immersive$ORB_TYPES[i]),
                             ItemDisplayContext.FIXED,
                             blockEntity.getLevel(),
                             null,
@@ -106,7 +106,7 @@ public class EnchantTableRendererMixin {
                     );
                 }
 
-                this.itemModelResolver.updateForTopItem(
+                this.immersive$itemModelResolver.updateForTopItem(
                         customState.getMagicCircleState(),
                         new ItemStack(ModItems.VFX_MAGIC_CIRCLE),
                         ItemDisplayContext.FIXED,
@@ -114,7 +114,7 @@ public class EnchantTableRendererMixin {
                         null,
                         seed + 10
                 );
-                this.itemModelResolver.updateForTopItem(
+                this.immersive$itemModelResolver.updateForTopItem(
                         customState.getPillarState(),
                         new ItemStack(ModItems.VFX_PILLAR),
                         ItemDisplayContext.FIXED,
@@ -206,7 +206,7 @@ public class EnchantTableRendererMixin {
                     if (exactTick < 20.0f) {
                         // PHASE 1 (0-20): The balls fly from the void toward the sword
                         float prog = exactTick / 20.0f;
-                        float invProg = 1.0f - easeOutBack(prog);
+                        float invProg = 1.0f - immersive$easeOutBack(prog);
 
                         // Target orbit at the center (very narrow, radius 0.4)
                         double targetAngle = Math.toRadians((time * 15.0f + (90.0 * i)) % 360.0);
@@ -231,7 +231,7 @@ public class EnchantTableRendererMixin {
                         float prog = (exactTick - 40.0f) / 20.0f;
 
                         double angleRad = Math.toRadians((time * 3.0f + (1.0f - prog) * 17.0f + (90.0 * i)) % 360.0);
-                        float currentRadius = 0.4f + easeOutBack(prog);
+                        float currentRadius = 0.4f + immersive$easeOutBack(prog);
 
                         runeX = tableCenterX + (float) Math.cos(angleRad) * currentRadius;
                         runeY = itemYOffset + Mth.sin(time * 0.1f) * 0.2f;
@@ -243,10 +243,10 @@ public class EnchantTableRendererMixin {
                         // Animation of the light beam expanding and contracting (Pillar)
                         float pillarProg = Math.min(1.0f, (exactTick - 40.0f) / 10.0f);
                         if (exactTick < 50.0f) {
-                            pillarWidth = easeInOutCubic(pillarProg) * 1.5f;
+                            pillarWidth = immersive$easeInOutCubic(pillarProg) * 1.5f;
                         } else {
                             float shrinkProg = (exactTick - 50.0f) / 10.0f;
-                            pillarWidth = (1.0f - easeInOutCubic(shrinkProg)) * 1.5f;
+                            pillarWidth = (1.0f - immersive$easeInOutCubic(shrinkProg)) * 1.5f;
                         }
 
                     } else {
@@ -306,19 +306,19 @@ public class EnchantTableRendererMixin {
                 float levitation;
                 if (clampedTick < 40.0f) {
                     // Smooth fade-in (0–40 ticks)
-                    levitation = easeInOutCubic(clampedTick / 40.0f) * 0.6f;
+                    levitation = immersive$easeInOutCubic(clampedTick / 40.0f) * 0.6f;
                 } else {
                     // Smooth descent back down (40–60 ticks)
                     float fallProg = (clampedTick - 40.0f) / 20.0f;
-                    levitation = 0.6f * (1.0f - easeInOutCubic(fallProg));
+                    levitation = 0.6f * (1.0f - immersive$easeInOutCubic(fallProg));
                 }
 
                 // STEP 1: ITEM ANIMATION
                 if (!customState.getImmersiveItemState().isEmpty()) {
                     poseStack.pushPose();
 
-                    float rotationX = clampedTick > 40.0f ? easeInOutCubic((clampedTick - 40.0f) / 20.0f) * 360.0f : 0.0f;
-                    float extraSpin = clampedTick > 40.0f ? easeInOutCubic((clampedTick - 40.0f) / 20.0f) * 720.0f : 0.0f;
+                    float rotationX = clampedTick > 40.0f ? immersive$easeInOutCubic((clampedTick - 40.0f) / 20.0f) * 360.0f : 0.0f;
+                    float extraSpin = clampedTick > 40.0f ? immersive$easeInOutCubic((clampedTick - 40.0f) / 20.0f) * 720.0f : 0.0f;
                     float swordSpin = customState.getImmersiveAngle() + extraSpin;
 
                     // Item uses the overall levitation height
@@ -351,7 +351,7 @@ public class EnchantTableRendererMixin {
                         } else {
                             // VACUUM (30–40): They suddenly veer toward the center
                             float pullProg = (clampedTick - 30.0f) / 10.0f;
-                            pullIn = 1.0f - easeInOutCubic(pullProg);
+                            pullIn = 1.0f - immersive$easeInOutCubic(pullProg);
                             currentRadius = 1.8f * pullIn;
                             angleRad = Math.toRadians((time * 28.0f + (90.0 * i)) % 360.0);
                         }
@@ -386,7 +386,7 @@ public class EnchantTableRendererMixin {
      * Ideal for light rays, zooming, and smooth transitions.
      */
     @Unique
-    private float easeInOutCubic(float x) {
+    private float immersive$easeInOutCubic(float x) {
         return x < 0.5f ? 4f * x * x * x : 1f - (float)Math.pow(-2f * x + 2f, 3f) / 2f;
     }
 
@@ -395,7 +395,7 @@ public class EnchantTableRendererMixin {
      * Creates a cool “spring” or rebound effect. We use this for runes flying into orbit.
      */
     @Unique
-    private float easeOutBack(float x) {
+    private float immersive$easeOutBack(float x) {
         float c1 = 1.70158f;
         float c3 = c1 + 1f;
         return 1f + c3 * (float)Math.pow(x - 1f, 3f) + c1 * (float)Math.pow(x - 1f, 2f);

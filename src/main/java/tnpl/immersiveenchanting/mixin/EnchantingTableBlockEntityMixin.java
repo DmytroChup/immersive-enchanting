@@ -27,64 +27,64 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implements IImmersiveTableData {
 
     @Unique
-    private static final String STATE_KEY = "ImmersiveState";
+    private static final String immersive$STATE_KEY = "ImmersiveState";
     @Unique
-    private static final String ITEM_KEY = "ImmersiveTargetItem";
+    private static final String immersive$ITEM_KEY = "ImmersiveTargetItem";
     @Unique
-    private static final String LAPIS_KEY = "ImmersiveLapisItem";
+    private static final String immersive$LAPIS_KEY = "ImmersiveLapisItem";
     @Unique
-    private static final String TICK_KEY = "ImmersiveAnimationTick";
+    private static final String immersive$TICK_KEY = "ImmersiveAnimationTick";
 
     @Unique
-    private TableState immersiveState = TableState.IDLE;
+    private TableState immersive$immersiveState = TableState.IDLE;
     @Unique
-    private ItemStack targetItem = ItemStack.EMPTY;
+    private ItemStack immersive$targetItem = ItemStack.EMPTY;
     @Unique
-    private ItemStack lapisStack = ItemStack.EMPTY;
+    private ItemStack immersive$lapisStack = ItemStack.EMPTY;
 
     @Unique
-    private int animationTick = 0;
+    private int immersive$animationTick = 0;
 
     protected EnchantingTableBlockEntityMixin(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
         super(type, pos, blockState);
     }
 
     @Override
-    public int getAnimationTick() { return this.animationTick; }
+    public int getAnimationTick() { return this.immersive$animationTick; }
 
     @Override
-    public void setAnimationTick(int tick) { this.animationTick = tick; }
+    public void setAnimationTick(int tick) { this.immersive$animationTick = tick; }
 
     @Override
-    public void incrementAnimationTick() { this.animationTick++; }
+    public void incrementAnimationTick() { this.immersive$animationTick++; }
 
     @Override
-    public TableState getState() { return this.immersiveState; }
+    public TableState getState() { return this.immersive$immersiveState; }
 
     @Override
     public void transitionTo(TableState newState) {
-        if (this.immersiveState != newState) {
-            this.immersiveState = newState;
-            this.animationTick = 0;
+        if (this.immersive$immersiveState != newState) {
+            this.immersive$immersiveState = newState;
+            this.immersive$animationTick = 0;
             this.setChanged();
         }
     }
 
     @Override
-    public ItemStack getTargetItem() { return this.targetItem; }
+    public ItemStack getTargetItem() { return this.immersive$targetItem; }
 
     @Override
     public void setTargetItem(ItemStack stack) {
-        this.targetItem = stack;
+        this.immersive$targetItem = stack;
         this.setChanged();
     }
 
     @Override
-    public ItemStack getLapisStack() { return this.lapisStack; }
+    public ItemStack getLapisStack() { return this.immersive$lapisStack; }
 
     @Override
     public void setLapisStack(ItemStack stack) {
-        this.lapisStack = stack;
+        this.immersive$lapisStack = stack;
         this.setChanged();
     }
 
@@ -98,25 +98,25 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
     @Override
     public @NonNull CompoundTag getUpdateTag(HolderLookup.@NonNull Provider registries) {
         CompoundTag tag = super.getUpdateTag(registries);
-        tag.putString(STATE_KEY, this.immersiveState.name());
+        tag.putString(immersive$STATE_KEY, this.immersive$immersiveState.name());
 
-        tag.putInt(TICK_KEY, this.animationTick);
+        tag.putInt(immersive$TICK_KEY, this.immersive$animationTick);
 
-        if (!this.targetItem.isEmpty()) {
+        if (!this.immersive$targetItem.isEmpty()) {
             ItemStack.OPTIONAL_CODEC.encodeStart(
                     registries.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE),
-                    this.targetItem
-            ).result().ifPresent(itemTag -> tag.put(ITEM_KEY, itemTag));
+                    this.immersive$targetItem
+            ).result().ifPresent(itemTag -> tag.put(immersive$ITEM_KEY, itemTag));
         } else {
-            tag.remove(ITEM_KEY);
+            tag.remove(immersive$ITEM_KEY);
         }
 
-        if (!this.lapisStack.isEmpty()) {
+        if (!this.immersive$lapisStack.isEmpty()) {
             ItemStack.OPTIONAL_CODEC.encodeStart(registries.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE),
-                            this.lapisStack
-                    ).result().ifPresent(itemTag -> tag.put(LAPIS_KEY, itemTag));
+                            this.immersive$lapisStack
+                    ).result().ifPresent(itemTag -> tag.put(immersive$LAPIS_KEY, itemTag));
         } else {
-            tag.remove(LAPIS_KEY);
+            tag.remove(immersive$LAPIS_KEY);
         }
 
         return tag;
@@ -124,28 +124,28 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
 
     @Inject(method = "saveAdditional", at = @At("TAIL"))
     private void onSaveAdditional(ValueOutput output, CallbackInfo ci) {
-        output.putString(STATE_KEY, this.immersiveState.name());
+        output.putString(immersive$STATE_KEY, this.immersive$immersiveState.name());
 
-        output.putInt(TICK_KEY, this.animationTick);
+        output.putInt(immersive$TICK_KEY, this.immersive$animationTick);
 
-        if (!this.targetItem.isEmpty()) {
-            output.store(ITEM_KEY, ItemStack.OPTIONAL_CODEC, this.targetItem);
+        if (!this.immersive$targetItem.isEmpty()) {
+            output.store(immersive$ITEM_KEY, ItemStack.OPTIONAL_CODEC, this.immersive$targetItem);
         }
-        if (!this.lapisStack.isEmpty()) {
-            output.store(LAPIS_KEY, ItemStack.OPTIONAL_CODEC, this.lapisStack);
+        if (!this.immersive$lapisStack.isEmpty()) {
+            output.store(immersive$LAPIS_KEY, ItemStack.OPTIONAL_CODEC, this.immersive$lapisStack);
         }
     }
 
     @Inject(method = "loadAdditional", at = @At("TAIL"))
     private void onLoadAdditional(ValueInput input, CallbackInfo ci) {
-        input.getString(STATE_KEY).ifPresent(stateStr -> {
-            this.immersiveState = TableState.valueOf(stateStr);
+        input.getString(immersive$STATE_KEY).ifPresent(stateStr -> {
+            this.immersive$immersiveState = TableState.valueOf(stateStr);
         });
 
-        input.getInt(TICK_KEY).ifPresent(tick -> this.animationTick = tick);
+        input.getInt(immersive$TICK_KEY).ifPresent(tick -> this.immersive$animationTick = tick);
 
-        this.targetItem = input.read(ITEM_KEY, ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
-        this.lapisStack = input.read(LAPIS_KEY, ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
+        this.immersive$targetItem = input.read(immersive$ITEM_KEY, ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
+        this.immersive$lapisStack = input.read(immersive$LAPIS_KEY, ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
     }
 
     @Nullable
