@@ -262,7 +262,7 @@ public class EnchantTableRendererMixin {
                     if (drawEnergyShell) {
                         poseStack.pushPose();
 
-                        Camera mainCamera = Minecraft.getInstance().gameRenderer.getMainCamera();
+                        Camera mainCamera = Minecraft.getInstance().gameRenderer.mainCamera();
 
                         // Rotate the sphere so that it ALWAYS faces the player directly
                         poseStack.mulPose(Axis.YP.rotationDegrees(-mainCamera.yRot()));

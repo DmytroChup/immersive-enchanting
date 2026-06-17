@@ -54,11 +54,11 @@ dependencies {
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
 	// Enchancement mod for compatibility testing
-	compileOnly "maven.modrinth:enchancement:26.1-r17"
-	localRuntime "maven.modrinth:enchancement:26.1-r17"
+	compileOnly "maven.modrinth:enchancement:${enchancement_version}"
+	localRuntime "maven.modrinth:enchancement:${enchancement_version}"
 
-	localRuntime "maven.modrinth:strawberrylib:26.1-r8"
-	localRuntime "maven.modrinth:midnightlib:1.9.3+26.1-fabric"
+	localRuntime "maven.modrinth:strawberrylib:${strawberrylib_version}"
+	localRuntime "maven.modrinth:midnightlib:${midnightlib_version}"
 }
 
 processResources {

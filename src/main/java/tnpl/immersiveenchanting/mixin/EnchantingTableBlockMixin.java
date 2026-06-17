@@ -7,7 +7,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -92,7 +92,7 @@ public class EnchantingTableBlockMixin {
                     }
                     if (!lvl.isClientSide()) {
                         if (tick == 1 && table.getState() == TableState.READY_TO_ENCHANT) {
-                            LightningBolt lightning = EntityType.LIGHTNING_BOLT.create(lvl, EntitySpawnReason.TRIGGERED);
+                            LightningBolt lightning = EntityTypes.LIGHTNING_BOLT.create(lvl, EntitySpawnReason.TRIGGERED);
                             if (lightning != null) {
                                 lightning.setPos(pos.getX() + 3.0, pos.getY(), pos.getZ() + 3.5);
                                 lightning.setVisualOnly(true);

@@ -3,15 +3,15 @@
 	"id": "immersiveenchanting",
 	"version": "${version}",
 	"name": "Immersive Enchanting",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Overhauls the Minecraft enchanting system to be more visual, engaging, and immersive.",
 	"authors": [
 		"tnpl"
 	],
 	"contact": {
 		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/DmytroChup/immersive-enchanting"
 	},
-	"license": "CC0-1.0",
+	"license": "MIT",
 	"icon": "assets/immersiveenchanting/icon.png",
 	"environment": "*",
 	"entrypoints": {
@@ -30,9 +30,9 @@
 		}
 	],
 	"depends": {
-		"fabricloader": ">=0.19.2",
-		"minecraft": "~26.1.2",
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.2",
 		"java": ">=25",
-		"fabric-api": "*"
+		"fabric-api": ">=0.152.1"
 	}
 }

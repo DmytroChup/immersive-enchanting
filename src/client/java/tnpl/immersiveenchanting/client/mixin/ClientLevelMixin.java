@@ -13,12 +13,19 @@ import java.util.function.BooleanSupplier;
 public class ClientLevelMixin {
 
     @Inject(method = "tick", at = @At("HEAD"))
-    private void onTick(BooleanSupplier hasTimeLeft, CallbackInfo ci) {
+    private void onTick(BooleanSupplier haveTime, CallbackInfo ci) {
         if (MagicAtmosphere.darknessTimeout > 0) {
             MagicAtmosphere.darknessTimeout--;
             MagicAtmosphere.magicDarkness += (1.0f - MagicAtmosphere.magicDarkness) * 0.03f;
         } else {
             MagicAtmosphere.magicDarkness -= MagicAtmosphere.magicDarkness * 0.05f;
+        }
+    }
+
+    @Inject(method = "tickWeatherEffects", at = @At("HEAD"), cancellable = true)
+    private void cancelFakeRainSoundAndParticles(CallbackInfo ci) {
+        if (MagicAtmosphere.magicDarkness > 0.01f) {
+            ci.cancel();
         }
     }
 }
