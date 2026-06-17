@@ -13,7 +13,7 @@
 
 ## 📥 Installation & Requirements
 
-* **Minecraft:** 1.21.x
+* **Minecraft:** 26.1.2
 * **Mod Loader:** [Fabric](https://fabricmc.net/)
 * **Dependencies:** [Fabric API](https://modrinth.com/mod/fabric-api) is strictly required.
 
